@@ -7,11 +7,11 @@ import streamlit as st
 from utils import compute_stats, load_progress, load_quizzes, save_progress, set_css_style
 from utils.session import cache_session, clear_session_cache, load_session
 
+st.set_page_config(page_title="Quiz Mode", initial_sidebar_state="collapsed", layout="wide")
+set_css_style(Path("style.css"))
 load_session()
 
 logger = logging.getLogger(__name__)
-
-set_css_style(Path("style.css"))
 
 
 def save_progress_click(progress):
@@ -44,9 +44,9 @@ def start_new_round(quizzes):
 def show_quiz():
     pos = st.session_state.quiz_mode_pos
     if pos >= len(st.session_state.quizzes):
-        st.success("Round complete — no more questions in this shuffled round.")
+        st.success("Round complete. There are no more questions in this shuffled round.")
         asked, correct, wrong, pct = compute_stats(st.session_state.quiz_mode_round_progress)
-        st.markdown(f"Asked: {asked} — Correct: {correct} — Wrong: {wrong} — Success: {pct:.1f}%")
+        st.markdown(f"Asked: {asked} | Correct: {correct} | Wrong: {wrong} | Success: {pct:.1f}%")
         progress = {st.session_state.quizzes[p].id: res for p, res in st.session_state.quiz_mode_round_progress.items()}
         if st.button(
             "Save round results to overall progress", icon="💾", on_click=save_progress_click, args=(progress,)
@@ -125,7 +125,7 @@ def show_quiz():
     st.markdown("---")
     # small live round stats
     asked, correct, wrong, pct = compute_stats(st.session_state.quiz_mode_round_progress)
-    st.markdown(f"Round progress — asked: {asked}, correct: {correct}, wrong: {wrong}, success: {pct:.1f}%")
+    st.markdown(f"Round progress: {asked} asked, {correct} correct, {wrong} wrong, {pct:.1f}% success")
 
     col1, col2 = st.columns(2)
     with col1:
@@ -140,7 +140,7 @@ def show_quiz():
         with st.popover("🚫 Stop Round"):
             # show stats for current round
             asked, correct, wrong, pct = compute_stats(st.session_state.quiz_mode_round_progress)
-            st.info(f"Round stats — asked: {asked}, correct: {correct}, wrong: {wrong}, success: {pct:.1f}%")
+            st.info(f"Round stats: {asked} asked, {correct} correct, {wrong} wrong, {pct:.1f}% success")
 
             progress = {
                 st.session_state.quizzes[p].id: res for p, res in st.session_state.quiz_mode_round_progress.items()
@@ -206,8 +206,6 @@ def show_stats():
 
 
 def main():
-    st.set_page_config(page_title="Quiz Mode")
-
     st.title("Quiz Mode")
 
     if st.session_state.quiz_in_progress and st.session_state.quizzes:

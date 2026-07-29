@@ -2,9 +2,12 @@ from pathlib import Path
 
 import streamlit as st
 
-from utils import load_progress, load_quizzes
+from utils import load_progress, load_quizzes, set_css_style
 
 MD_PATH = Path("export_for_lm.md")
+
+st.set_page_config(page_title="Export for NotebookLM", initial_sidebar_state="collapsed", layout="wide")
+set_css_style(Path("style.css"))
 
 
 # Read and display markdown content

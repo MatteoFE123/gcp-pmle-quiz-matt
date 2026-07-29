@@ -7,6 +7,8 @@ import streamlit as st
 from utils import set_css_style
 from utils.session import load_session
 
+st.set_page_config(page_title="Edit Questions Mode", initial_sidebar_state="collapsed", layout="wide")
+set_css_style(Path("style.css"))
 load_session()
 
 
@@ -17,12 +19,7 @@ quizzies = pd.read_json("data/quizzes.jsonl", lines=True, orient="records")
 
 logger = logging.getLogger(__name__)
 
-set_css_style(Path("style.css"))
-
-
 def main():
-    st.set_page_config(page_title="Edit Questions Mode")
-
     st.title("View Gemini Results")
 
     pos = st.session_state.pos

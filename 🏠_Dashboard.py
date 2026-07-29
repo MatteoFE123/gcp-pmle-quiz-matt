@@ -6,14 +6,11 @@ from dashboard import show_dashboard
 from utils import reset_progress, save_progress, set_css_style
 
 st.set_page_config(page_title="Quiz Learner", initial_sidebar_state="collapsed", layout="wide")
+set_css_style(Path("style.css"))
 
 
 def main():
-    st.set_page_config(page_title="Quiz Learner", initial_sidebar_state="collapsed", layout="wide")
-
-    set_css_style(Path("style.css"))
-
-    st.title("Quiz Learner — Dashboard")
+    st.title("Quiz Learner - Dashboard")
 
     stats = show_dashboard()
 

@@ -1,5 +1,6 @@
 # app.py
 import re
+from pathlib import Path
 
 import networkx as nx
 import pandas as pd
@@ -8,7 +9,14 @@ import streamlit as st
 # PyVis for interactive graph inside Streamlit
 from pyvis.network import Network
 
-from utils import DATA_DIR
+from utils import DATA_DIR, set_css_style
+
+st.set_page_config(
+    page_title="GCP Product Learning Map",
+    initial_sidebar_state="collapsed",
+    layout="wide",
+)
+set_css_style(Path("style.css"))
 
 
 def load_data():
@@ -143,8 +151,6 @@ def capability_matrix(rows):
 # -----------------------------
 # Streamlit UI
 # -----------------------------
-st.set_page_config(page_title="GCP Product Learning Map", layout="wide")
-
 st.title("GCP Product Learning Map")
 st.caption("Comparison views to learn products and understand their connections.")
 
