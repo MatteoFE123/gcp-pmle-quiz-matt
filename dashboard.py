@@ -93,7 +93,7 @@ def show_topic_distribution():
     fig.update_xaxes(showgrid=True, gridwidth=1, zeroline=False)
     fig.update_yaxes(showgrid=False)
 
-    st.plotly_chart(fig, width="stretch")
+    st.plotly_chart(fig, width="stretch", key="topic_distribution_chart")
 
 
 def show_knowledge_gaps(topic_field: str = "gcp_topics"):
@@ -220,4 +220,4 @@ def show_knowledge_gaps(topic_field: str = "gcp_topics"):
     fig.update_xaxes(showgrid=True, gridwidth=1, zeroline=False)
     fig.update_yaxes(showgrid=False)
 
-    st.plotly_chart(fig, width="stretch")
+    st.plotly_chart(fig, width="stretch", key=f"knowledge_gap_chart_{topic_field}")
