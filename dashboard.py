@@ -1,223 +1,188 @@
+import json
+
 import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from utils import PROGRESS_FILE, QUIZ_FILE, compute_stats, load_progress, load_quizzes
+from models.questions import Question
+from ui import QUIZ_PAGE, page_heading, setup_page
+from utils import DataError, load_progress, load_questions
+from utils.session import load_session, reset_history
+
+TOPIC_FIELDS = {"Temas GCP": "gcp_topics", "Productos": "gcp_products", "Machine learning": "ml_topics"}
+SORTS = {
+    "Más fallos primero": ("gap", False),
+    "Menor precisión primero": ("accuracy", True),
+    "Más preguntas primero": ("attempts", False),
+}
+
+
+def catalog_stats(questions: list[Question], progress: dict[int, bool]) -> dict[str, int]:
+    ids = {q.id for q in questions}
+    current = {key: result for key, result in progress.items() if key in ids}
+    correct = sum(current.values())
+    return {
+        "total": len(questions),
+        "correct": correct,
+        "wrong": len(current) - correct,
+        "unanswered": len(questions) - len(current),
+    }
+
+
+def topic_statistics(questions: list[Question], progress: dict[int, bool], field: str) -> pd.DataFrame:
+    rows = [
+        {"topic": topic, "result": progress[q.id]}
+        for q in questions if q.id in progress
+        for topic in set(getattr(q, field))
+    ]
+    if not rows:
+        return pd.DataFrame(columns=["topic", "attempts", "correct", "accuracy", "gap"])
+    result = (
+        pd.DataFrame(rows).groupby("topic")["result"]
+        .agg(attempts="count", correct="sum", accuracy="mean").reset_index()
+    )
+    result["gap"] = 1 - result["accuracy"]
+    return result
+
+
+def ranked_topics(stats: pd.DataFrame, sort_by: str, limit: int) -> pd.DataFrame:
+    column, ascending = SORTS[sort_by]
+    return stats.sort_values([column, "topic"], ascending=[ascending, True]).head(limit)
+
+
+def show_metrics(stats: dict[str, int]):
+    cols = st.columns(4)
+    for col, label, key in zip(cols, ["Preguntas", "Pendientes", "Aciertos", "Fallos"], ["total", "unanswered", "correct", "wrong"]):
+        col.metric(label, stats[key])
+
+
+def show_home():
+    setup_page("Inicio")
+    page_heading("Tu próxima sesión de estudio", "Practica a tu ritmo para Google Cloud Professional Machine Learning Engineer.")
+    try:
+        questions = load_questions()
+        progress = load_progress()
+        load_session()
+        stats = catalog_stats(questions, progress)
+        with st.container(border=True, key="study_start"):
+            if st.session_state.quiz_in_progress:
+                st.subheader("Tienes una ronda pendiente")
+                answered = len(st.session_state.quiz_mode_round_progress)
+                st.write(f"{answered} de {len(st.session_state.quizzes)} preguntas respondidas. Continúa donde lo dejaste.")
+                if st.button("Continuar ronda", type="primary", icon=":material/play_arrow:"):
+                    st.switch_page(QUIZ_PAGE)
+            else:
+                st.subheader("Un poco de práctica, cada día")
+                st.write("Elige una sesión corta, repasa tus fallos o céntrate en un tema.")
+                if st.button("Preparar práctica", type="primary", icon=":material/play_arrow:"):
+                    st.switch_page(QUIZ_PAGE)
+        st.subheader("Tu banco de preguntas")
+        show_metrics(stats)
+        st.caption("Se muestra el último resultado guardado de cada pregunta. No es una predicción de la nota del examen.")
+        weak = ranked_topics(topic_statistics(questions, progress, "gcp_topics"), "Más fallos primero", 5)
+        weak = weak[weak["gap"] > 0]
+        if not weak.empty:
+            st.subheader("Un tema para tu próximo repaso")
+            topic = weak.iloc[0]["topic"]
+            st.write(topic)
+            st.caption("Basado en tus últimos resultados. Con pocas preguntas, esta recomendación es orientativa.")
+            if st.button("Practicar este tema", icon=":material/target:"):
+                st.session_state.practice_topic_request = topic
+                st.switch_page(QUIZ_PAGE)
+        else:
+            st.info("Los temas que necesiten repaso aparecerán aquí cuando guardes tus primeras respuestas.")
+        with st.expander("Datos y reinicio"):
+            st.write("Esta instalación es para un único estudiante. Otros navegadores comparten el mismo historial local.")
+            st.download_button(
+                "Descargar copia del progreso",
+                data=json.dumps(progress, ensure_ascii=False, indent=2),
+                file_name="progreso-pmle.json", mime="application/json",
+            )
+            st.caption("El reinicio borra el historial guardado, no las preguntas. Se conserva una copia de seguridad.")
+            if st.session_state.quiz_in_progress:
+                st.info("Guarda o descarta la ronda pendiente en Práctica antes de reiniciar el historial.")
+            else:
+                confirmed = st.checkbox("Quiero borrar mi historial guardado", key="confirm_reset")
+                if st.button("Reiniciar historial", disabled=not confirmed or not progress):
+                    reset_history()
+                    st.session_state.pop("confirm_reset", None)
+                    st.session_state.message = "Historial reiniciado. Se conserva una copia del archivo anterior."
+                    st.rerun()
+    except DataError as error:
+        st.error(str(error))
 
 
 def show_dashboard():
-    progress = load_progress()
-    quizzes = load_quizzes(progress)
-
-    total = len(quizzes[0]) + len(quizzes[1]) + len(quizzes[2])
-    _, correct, wrong, _ = compute_stats(progress)
-    unanswered = total - (correct + wrong)
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Total questions", total)
-    col2.metric("Unanswered", unanswered)
-    col3.metric("Correct", correct)
-    col4.metric("Wrong", wrong)
-    show_topic_distribution()
-    if PROGRESS_FILE.exists() and len(PROGRESS_FILE.read_text().strip()) > 0:
-        show_knowledge_gaps(topic_field="gcp_topics")
-        show_knowledge_gaps(topic_field="gcp_products")
-        show_knowledge_gaps(topic_field="ml_topics")
-    else:
-        st.info("No progress found. Answer some quizzes to see your knowledge gaps.", icon="ℹ️")
-
-    return {"total": total, "correct": correct, "wrong": wrong, "unanswered": unanswered}
+    setup_page("Progreso")
+    page_heading("Progreso", "Detecta qué repasar. Los datos reflejan el último resultado guardado, no todos tus intentos.")
+    try:
+        questions, progress = load_questions(), load_progress()
+        stats = catalog_stats(questions, progress)
+        show_metrics(stats)
+        st.caption("Una pregunta con varias etiquetas participa en varios temas. Los porcentajes no equivalen a preparación para el examen.")
+        field_label = st.selectbox("Analizar por", list(TOPIC_FIELDS))
+        field = TOPIC_FIELDS[field_label]
+        view = st.radio("Vista", ["Qué repasar", "Contenido del banco"], horizontal=True)
+        if view == "Contenido del banco":
+            show_topic_distribution(questions, field)
+        else:
+            show_knowledge_gaps(field, questions, progress)
+        return stats
+    except DataError as error:
+        st.error(str(error))
+        return None
 
 
-def show_topic_distribution():
-    questions = pd.read_json(QUIZ_FILE, lines=True)
-    df = questions[["id", "gcp_topics"]].explode("gcp_topics").rename(columns={"gcp_topics": "topic"})
-    df.dropna(subset=["topic"], inplace=True)
-    st.title("📚 Topic Distribution")
-
-    with st.container(border=True):
-        c1, c2, c3 = st.columns([1, 1, 2], vertical_alignment="center")
-
-        top_n = c1.slider("Top N topics", 5, 50, 20)
-        total_rows = len(df)
-        unique_topics = df["topic"].nunique(dropna=True)
-        c3.metric("Rows (topic tags)", f"{total_rows:,}", help="After explode(); one row per (question, topic) tag.")
-        c2.metric("Unique topics", f"{unique_topics:,}")
-
-    # --- Compute topic stats ---
-    topic_stats = df["topic"].dropna().astype(str).value_counts().rename_axis("topic").reset_index(name="count")
-    topic_stats["percent"] = (topic_stats["count"] / topic_stats["count"].sum()) * 100.0
-
-    # Keep top N
-    plot_df = topic_stats.head(top_n).copy()
-
-    # Sort so largest is on top (nice for horizontal bars)
-    plot_df = plot_df.sort_values("count", ascending=True)
-
-    value_col = "count"
-    value_label = "Count"
-
-    # --- Plotly: modern horizontal bar chart ---
-    fig = px.bar(
-        plot_df,
-        x=value_col,
-        y="topic",
-        orientation="h",
-        text=value_col,
-        hover_data={
-            "topic": True,
-            "count": ":,",
-            "percent": ":.2f",
-            value_col: False,  # avoid duplicate in hover
-        },
-        title="Topics (Top N)",
-    )
-
-    # Modern styling tweaks
-    fig.update_traces(
-        texttemplate="%{text:,}",
-        textposition="outside",
-        cliponaxis=False,
-    )
-
-    fig.update_layout(
-        height=max(450, 28 * len(plot_df) + 200),
-        margin=dict(l=20, r=20, t=70, b=20),
-        template="plotly_white",
-        title=dict(x=0.01, xanchor="left"),
-        xaxis_title=value_label,
-        yaxis_title="",
-        bargap=0.25,
-        hoverlabel=dict(namelength=-1),
-    )
-
-    fig.update_xaxes(showgrid=True, gridwidth=1, zeroline=False)
-    fig.update_yaxes(showgrid=False)
-
-    st.plotly_chart(fig, width="stretch", key="topic_distribution_chart")
-
-
-def show_knowledge_gaps(topic_field: str = "gcp_topics"):
-    questions = pd.read_json(QUIZ_FILE, lines=True)
-    progress = pd.read_json(PROGRESS_FILE, orient="index").rename(columns={0: "answer_correct"})
-    questions = questions.merge(progress, left_on="id", right_index=True, how="left")
-
-    df = questions[["id", "answer_correct", topic_field]].explode(topic_field).rename(columns={topic_field: "topic"})
-
-    df.dropna(subset=["answer_correct"], inplace=True)
-
-    topic_field_name = topic_field.replace("_", " ").title()
-    st.title(f"🧠 Knowledge Gap per {topic_field_name}")
-
-    # --- Compute topic stats ---
-    topic_stats = (
-        df.dropna(subset=["topic"])
-        .assign(topic=lambda d: d["topic"].astype(str))
-        .groupby("topic")
-        .agg(
-            attempts=("answer_correct", "count"),
-            correct=("answer_correct", "sum"),
-            accuracy=("answer_correct", "mean"),
-        )
-        .reset_index()
-        .rename(columns={"ml_topics": "topic"})
-    )
-
-    # Safety: ensure boolean -> numeric
-    # (If answer_correct is already bool, sum/mean work; if string, fix upstream)
-    topic_stats["accuracy"] = topic_stats["accuracy"].astype(float)
-    topic_stats["gap"] = 1.0 - topic_stats["accuracy"]
-
-    # --- Controls ---
-    with st.container(border=True):
-        c1, c2, c3, c4 = st.columns([1.2, 1.2, 1.2, 2.4], vertical_alignment="center")
-
-        min_question_topic = c1.slider(
-            "Min questions per topic (show topics ≥ this)",
-            1,
-            int(max(1, topic_stats["attempts"].max())),
-            5,
-            key=f"min_questions_{topic_field}",
-        )
-        max_accuracy = c2.slider(
-            "Max accuracy (show topics ≤ this)", 0.0, 1.0, 0.80, 0.01, key=f"max_accuracy_{topic_field}"
-        )
-        sort_by = c3.selectbox(
-            "Sort by",
-            ["Gap (largest first)", "Accuracy (lowest first)", "Question count (highest first)"],
-            key=f"sort_by_{topic_field}",
-        )
-
-        total_topics = int(topic_stats["topic"].nunique())
-        c4.metric("Topics covered", f"{total_topics:,}")
-
-    # --- Filter by max accuracy + min attempts ---
-    plot_df = topic_stats[
-        (topic_stats["attempts"] >= min_question_topic) & (topic_stats["accuracy"] <= max_accuracy)
-    ].copy()
-
-    if plot_df.empty:
-        st.info("No topics match the current filters. Try increasing 'Max accuracy' or lowering 'Min questions'.")
+def show_topic_distribution(questions=None, field="gcp_topics"):
+    questions = load_questions() if questions is None else questions
+    topics = [topic for q in questions for topic in set(getattr(q, field))]
+    st.subheader("Contenido del banco")
+    if not topics:
+        st.info("No hay etiquetas disponibles para esta categoría.")
         return
-    # --- Sorting ---
-    if sort_by == "Gap (largest first)":
-        plot_df = plot_df.sort_values("gap", ascending=True)
-        x_col = "gap"
-        x_label = "Gap score (1 - accuracy)"
-        title = "Weak topics (highest gap)"
-        text_template = "%{x:.2f}"
-    elif sort_by == "Accuracy (lowest first)":
-        plot_df = plot_df.sort_values("accuracy", ascending=False)
-        x_col = "accuracy"
-        x_label = "Accuracy"
-        title = "Low-accuracy topics"
-        text_template = "%{x:.2f}"
-    else:
-        plot_df = plot_df.sort_values("attempts", ascending=True)
-        x_col = "attempts"
-        x_label = "Questions"
-        title = "Topics with most attempts (filtered by accuracy)"
-        text_template = "%{x:,}"
+    stats = pd.Series(topics).value_counts().rename_axis("Tema").reset_index(name="Preguntas")
+    limit = st.select_slider("Temas a mostrar", [5, 10, 20, 40], value=10)
+    selected = stats.head(limit)
+    chart = px.bar(selected.iloc[::-1], x="Preguntas", y="Tema", orientation="h", color_discrete_sequence=["#27856b"])
+    chart.update_layout(height=max(300, 30 * len(selected) + 100), margin=dict(l=0, r=20, t=20, b=0))
+    st.plotly_chart(chart, theme="streamlit", width="stretch", key=f"distribution_{field}")
+    with st.expander("Ver datos del gráfico"):
+        st.dataframe(selected, hide_index=True, width="stretch")
 
-    # Keep the chart readable (show top K after sorting)
-    top_k = st.slider("Max topics to display", 5, 60, 25, key=f"max_topics_{topic_field}")
-    plot_df = plot_df.head(top_k).copy()
 
-    # --- Plotly chart (modern horizontal bars) ---
-    fig = px.bar(
-        plot_df,
-        x=x_col,
-        y="topic",
-        orientation="h",
-        text=x_col,
-        hover_data={
-            "topic": True,
-            "attempts": ":,",
-            "correct": ":,",
-            "accuracy": ":.2f",
-            "gap": ":.2f",
-            x_col: False,  # avoid duplicate
-        },
-        title=title,
+def show_knowledge_gaps(topic_field="gcp_topics", questions=None, progress=None):
+    questions = load_questions() if questions is None else questions
+    progress = load_progress() if progress is None else progress
+    stats = topic_statistics(questions, progress, topic_field)
+    st.subheader("Qué repasar")
+    if stats.empty:
+        st.info("Todavía no hay resultados con etiquetas en esta categoría. Guarda una ronda para empezar.")
+        return
+    with st.expander("Ajustar el análisis"):
+        c1, c2 = st.columns(2)
+        minimum = c1.number_input("Mínimo de preguntas por tema", min_value=1, max_value=int(stats.attempts.max()), value=1, key=f"min_{topic_field}")
+        maximum = c2.slider("Precisión máxima (%)", 0, 100, 100, key=f"accuracy_{topic_field}")
+        sort_by = st.selectbox("Orden", list(SORTS), key=f"sort_{topic_field}")
+        limit = st.select_slider("Límite de temas", [5, 10, 20, 40], value=10, key=f"limit_{topic_field}")
+    filtered = stats[(stats.attempts >= minimum) & (stats.accuracy <= maximum / 100)]
+    if filtered.empty:
+        st.info("Ningún tema coincide. Reduce el mínimo de preguntas o aumenta la precisión máxima.")
+        return
+    selected = ranked_topics(filtered, sort_by, limit)
+    chart_data = selected.iloc[::-1].copy()
+    chart_data["Fallos (%)"] = chart_data.gap * 100
+    chart = px.bar(
+        chart_data, x="Fallos (%)", y="topic", orientation="h",
+        labels={"topic": "Tema", "attempts": "Preguntas", "correct": "Aciertos"},
+        hover_data=["attempts", "correct"], color_discrete_sequence=["#27856b"],
     )
-
-    fig.update_traces(
-        texttemplate=text_template,
-        textposition="outside",
-        cliponaxis=False,
+    chart.update_layout(height=max(300, 30 * len(selected) + 100), margin=dict(l=0, r=20, t=20, b=0))
+    chart.update_xaxes(range=[0, 100])
+    st.plotly_chart(chart, theme="streamlit", width="stretch", key=f"gaps_{topic_field}")
+    st.caption("Se eligen primero los temas prioritarios y después se ordenan para dibujar el gráfico.")
+    table = selected[["topic", "attempts", "correct", "accuracy"]].rename(
+        columns={"topic": "Tema", "attempts": "Preguntas", "correct": "Aciertos", "accuracy": "Precisión (%)"}
     )
-
-    fig.update_layout(
-        template="plotly_white",
-        height=max(500, 28 * len(plot_df) + 220),
-        margin=dict(l=20, r=20, t=70, b=20),
-        title=dict(x=0.01, xanchor="left"),
-        xaxis_title=x_label,
-        yaxis_title="",
-        bargap=0.25,
-        hoverlabel=dict(namelength=-1),
-    )
-
-    fig.update_xaxes(showgrid=True, gridwidth=1, zeroline=False)
-    fig.update_yaxes(showgrid=False)
-
-    st.plotly_chart(fig, width="stretch", key=f"knowledge_gap_chart_{topic_field}")
+    table["Precisión (%)"] = (table["Precisión (%)"] * 100).round(1)
+    with st.expander("Ver datos del gráfico"):
+        st.dataframe(table, hide_index=True, width="stretch")

@@ -1,17 +1,14 @@
-FROM ghcr.io/astral-sh/uv:python3.13-trixie
+FROM ghcr.io/astral-sh/uv:0.11.27-python3.13-trixie
 
 WORKDIR /app
 
-# Copy project files (copying pyproject first could be used for better layer caching)
+COPY pyproject.toml uv.lock /app/
+RUN uv sync --locked --no-dev
 COPY . /app
-
-
-
-RUN uv sync
+ENV PATH="/app/.venv/bin:$PATH"
 
 EXPOSE 8501
 
-HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
+HEALTHCHECK CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8501/_stcore/health', timeout=5)"
 
-# Start the app with uvicorn; override APP_MODULE, HOST or PORT at runtime if needed
-CMD ["uv", "run", "streamlit", "run", "🏠_Dashboard.py"]
+CMD ["streamlit", "run", "🏠_Dashboard.py"]

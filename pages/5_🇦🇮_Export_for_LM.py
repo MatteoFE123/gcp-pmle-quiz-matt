@@ -1,52 +1,56 @@
-from pathlib import Path
-
 import streamlit as st
 
-from utils import load_progress, load_quizzes, set_css_style
+from ui import answer_label, correct_answers, page_heading, setup_page
+from utils import DataError, load_progress, load_quizzes
 
-MD_PATH = Path("export_for_lm.md")
-
-st.set_page_config(page_title="Export for NotebookLM", initial_sidebar_state="collapsed", layout="wide")
-set_css_style(Path("style.css"))
-
-
-# Read and display markdown content
-if MD_PATH.exists():
-    st.markdown(MD_PATH.read_text(encoding="utf-8"))
-else:
-    st.error(f"Markdown file '{MD_PATH.name}' not found.")
+SCOPES = {
+    "Preguntas falladas": (0, "preguntas-falladas.md"),
+    "Preguntas pendientes": (1, "preguntas-pendientes.md"),
+    "Preguntas acertadas": (2, "preguntas-acertadas.md"),
+}
 
 
-# Export questions with "False" in Progress.json
+def export_markdown(questions, title, include_explanations=True):
+    lines = [f"# {title}", "", "Material de repaso personal. El contenido conserva su idioma original.", ""]
+    for question in questions:
+        lines.extend([f"## Pregunta #{question.id}", "", question.question, "", "### Opciones", ""])
+        lines.extend(answer_label(question, index) for index in range(len(question.options)))
+        lines.extend(["", "### Respuesta correcta", ""])
+        lines.extend(answer_label(question, index) for index in correct_answers(question))
+        if include_explanations and question.explanation:
+            lines.extend(["", "### Explicación", "", question.explanation])
+        lines.extend(["", "---", ""])
+    return "\n".join(lines)
+
+
 def export_false_questions():
-    progress = load_progress()
-    questions, _, _ = load_quizzes(progress)
-
-    # Create markdown content
-    md_lines = [
-        "# Questions that I lack knowledge of\n",
-        "Below is a list of questions that I answered incorrectly. I should review these topics to improve my understanding.",
-        "Use all these questions as starting point to create flashcards and quizzes for me to study.",
-        "Use related knowledge to create additional questions to help me learn the topics better.\n",
-    ]
-    for q in questions:
-        md_lines.append(f"## Question ID: {q.id}\n")
-        md_lines.append(f"### Question: \n\n {q.question}\n")
-        md_lines.append("### Answer Options:")
-        md_lines.extend([f"- {answer}" for answer in q.options])
-        md_lines.append("\n### Correct Answer:\n")
-        if isinstance(q.answer, list):
-            md_lines.extend([f"- {q.options[a]}" for a in q.answer])
-        else:
-            md_lines.append(f"- {q.options[q.answer]}")
-
-        md_lines.append("---\n")
-
-    return "\n".join(md_lines)
+    questions, _, _ = load_quizzes(load_progress())
+    return export_markdown(questions, "Preguntas falladas")
 
 
-if st.button("Export Unanswered Questions for NotebookLM", type="primary"):
-    export_md = export_false_questions()
-    st.download_button(
-        label="Download Markdown", data=export_md, file_name="unanswered_questions.md", mime="text/markdown"
-    )
+def main():
+    setup_page("Exportar")
+    page_heading("Exportar para repasar", "Descarga solo las preguntas que necesitas. No se envía nada a un servicio externo.")
+    try:
+        scope = st.selectbox("Contenido", list(SCOPES))
+        include = st.checkbox("Incluir explicaciones", value=True)
+        index, filename = SCOPES[scope]
+        questions = load_quizzes(load_progress())[index]
+        st.metric("Preguntas en el archivo", len(questions))
+        if not questions:
+            st.info("No hay preguntas en este grupo. Elige otro o guarda una ronda.")
+            return
+        st.info("Antes de subir el archivo a NotebookLM u otro servicio, comprueba los permisos del contenido y su política de privacidad.")
+        content = export_markdown(questions, scope, include)
+        st.download_button("Descargar Markdown", data=content, file_name=filename, mime="text/markdown", type="primary")
+        st.caption("El archivo incluye preguntas y respuestas, no tu archivo de progreso. Las imágenes locales pueden no estar disponibles fuera de la aplicación.")
+        with st.expander("Vista previa de la primera pregunta"):
+            st.code(export_markdown(questions[:1], scope, include), language="markdown", wrap_lines=True)
+        with st.expander("Cómo usarlo para repasar"):
+            st.write("Si tienes permiso, añade el archivo a tu herramienta de estudio. Pide preguntas nuevas sobre los mismos conceptos y contrasta las respuestas con documentación oficial.")
+    except DataError as error:
+        st.error(str(error))
+
+
+if __name__ == "__main__":
+    main()

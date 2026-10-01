@@ -6,11 +6,11 @@ services:
       dockerfile: Dockerfile
     image: gcp-pmle-quiz-streamlit
     ports:
-      - "8501:8501"
+      - "127.0.0.1:8501:8501"
     volumes:
       - ./data:/app/data:rw
+      - ./cache:/app/cache:rw
     environment:
-      - STREAMLIT_SERVER_ENABLECORS=false
       - STREAMLIT_SERVER_RUN_ON_SAVE=false
       - STREAMLIT_SERVER_HEADLESS=true
       - STREAMLIT_SERVER_PORT=8501

@@ -1,18 +1,13 @@
 [project]
 name = "quiz"
 version = "0.1.0"
-description = "Quiz Learner Streamlit app"
+description = "PMLE study workspace built with Streamlit"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
   "streamlit>=1.52.2",
   "pydantic>=2.12.5",
-  "pyvis>=0.3.2",
   "pandas>=2.3.3",
   "diskcache>=5.6.3",
   "plotly>=6.5.1",
 ]
-
-[project.scripts]
-# Console script so tooling (and `uv`) can detect an entrypoint
-quiz = "🏠_Dashboard:main"

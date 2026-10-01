@@ -1,112 +1,70 @@
-import logging
-from pathlib import Path
-
-import pandas as pd
 import streamlit as st
+from pydantic import ValidationError
 
-from utils import set_css_style
-from utils.session import load_session
+from models.questions import Question
+from ui import answer_label, correct_answers, explanation, page_heading, question_content, setup_page
+from utils import DataError, load_questions, save_question
 
-st.set_page_config(page_title="Edit Questions Mode", initial_sidebar_state="collapsed", layout="wide")
-set_css_style(Path("style.css"))
-load_session()
-
-
-st.session_state.setdefault("pos", 0)
-st.session_state.setdefault("is_editing", False)
-
-quizzies = pd.read_json("data/quizzes.jsonl", lines=True, orient="records")
-
-logger = logging.getLogger(__name__)
 
 def main():
-    st.title("View Gemini Results")
-
-    pos = st.session_state.pos
-
-    if pos < 0:
-        st.session_state.pos = 0
-        pos = 0
-    if pos >= len(quizzies):
-        st.session_state.pos = len(quizzies) - 1
-        pos = len(quizzies) - 1
-
-    quizzy = quizzies.iloc[pos]
-
-    col1, col2, col3 = st.columns([1, 2, 1])
-    if col1.button("Previous", disabled=pos <= 0, type="primary", icon="⬅️"):
-        st.session_state.pos -= 1
-        st.rerun()
-    if col2.button("Edit Current Question", type="secondary", icon="✏️"):
-        st.session_state.is_editing = True
-        st.rerun()
-    if (
-        new_id := col2.number_input(
-            "Go to Question id:", min_value=1, max_value=quizzies.id.max(), value=quizzy.id, width=150
-        )
-    ) != quizzy.id:
-        if new_id not in quizzies.id.values:
-            st.warning(f"Question id {new_id} does not exist.")
-        else:
-            st.session_state.pos = quizzies[quizzies.id == new_id].index[0]
-            st.rerun()
-    if col3.button("Next", disabled=pos >= len(quizzies) - 1, type="primary", icon="➡️"):
-        st.session_state.pos += 1
-        st.rerun()
-
-    st.markdown(f"### Question (Id: {quizzy.id})  {pos + 1} / {len(quizzies)}")
-    question = quizzy.question if "<p>" in quizzy.question.lower() else f"<p>{quizzy.question}</p>"
-    st.markdown(question, unsafe_allow_html=True)
-
-    if st.session_state.is_editing:
-        answers = []
-        answ_list = quizzy.answer if isinstance(quizzy.answer, list) else [quizzy.answer]
-        for idx, option in enumerate(quizzy.options):
-            answers.append(
-                st.checkbox(
-                    option,
-                    value=(idx in answ_list),
-                    key=f"option_{pos}_{idx}",
+    setup_page("Editar preguntas")
+    page_heading("Editar preguntas", "Herramienta local de mantenimiento. Cambia la respuesta y explicación sin alterar el identificador.")
+    try:
+        questions = load_questions()
+        lookup = {question.id: question for question in questions}
+        editing = st.session_state.get("editor_original")
+        if st.session_state.get("editor_id") not in lookup:
+            st.session_state.editor_id = questions[0].id
+        selected = st.selectbox("Pregunta por identificador", list(lookup), key="editor_id", disabled=editing is not None)
+        question = editing if editing is not None else lookup[selected]
+        st.caption(f"Pregunta #{question.id} · {'Respuesta única' if question.mode == 'single_choice' else 'Selección múltiple'}")
+        question_content(question)
+        if editing is None:
+            for index in range(len(question.options)):
+                st.markdown(answer_label(question, index))
+            with st.expander("Respuesta y explicación actuales", expanded=True):
+                explanation(question)
+            if st.button("Editar esta pregunta", type="primary"):
+                st.session_state.editor_original = question.model_copy(deep=True)
+                st.rerun()
+            st.caption("Las preguntas y explicaciones se mantienen en su idioma original. Los cambios guardados afectan a futuras rondas.")
+            return
+        st.warning("Guarda o cancela antes de cambiar de página. Los cambios del formulario sin enviar pueden perderse al navegar.")
+        with st.form(f"editor_{question.id}"):
+            if question.mode == "single_choice":
+                answer = st.radio(
+                    "Respuesta correcta", range(len(question.options)),
+                    index=correct_answers(question)[0],
+                    format_func=lambda index: answer_label(question, index),
                 )
-            )
-
-    else:
-        for option in quizzy.options:
-            st.markdown(f"-  {option}\n")
-
-    st.markdown("**Current Answer:**")
-    if isinstance(quizzy.answer, list):
-        for ans_idx in quizzy.answer:
-            st.markdown(f"- {quizzy.options[ans_idx]}")
-    else:
-        st.markdown(quizzy.options[quizzy.answer])
-
-    st.markdown("---")
-
-    st.markdown("## Explanation:")
-    if st.session_state.is_editing:
-        explanation = st.text_area(
-            "Edit Explanation:",
-            value=quizzy.explanation,
-            height=400,
-            key=f"explanation_{pos}",
-        )
-    else:
-        st.markdown(quizzy.explanation, unsafe_allow_html=True)
-
-    if st.session_state.is_editing:
-        col_save, col_cancel = st.columns(2)
-        if col_save.button("💾 Save Changes", type="primary", key=f"save_{pos}"):
-            new_answer = [i for i, val in enumerate(answers) if val]
-            quizzies.at[quizzy.name, "answer"] = new_answer if len(new_answer) > 1 else new_answer[0]
-            quizzies.at[quizzy.name, "explanation"] = explanation
-            quizzies.to_json("data/quizzes.jsonl", lines=True, orient="records")
-            st.session_state.is_editing = False
-            st.success("Changes saved successfully!")
+            else:
+                answer = st.multiselect(
+                    "Respuestas correctas", range(len(question.options)),
+                    default=correct_answers(question),
+                    format_func=lambda index: answer_label(question, index),
+                )
+            text = st.text_area("Explicación", value=question.explanation or "", height=280)
+            save = st.form_submit_button("Guardar cambios", type="primary")
+            cancel = st.form_submit_button("Cancelar edición")
+        if cancel:
+            del st.session_state.editor_original
             st.rerun()
-        if col_cancel.button("❌ Cancel", type="secondary", key=f"cancel_{pos}"):
-            st.session_state.is_editing = False
+        if save:
+            try:
+                updated = Question.model_validate({**question.model_dump(), "answer": answer, "explanation": text})
+            except ValidationError:
+                st.error("Selecciona una respuesta válida. La selección múltiple necesita al menos una opción.")
+                return
+            save_question(updated, original=question)
+            del st.session_state.editor_original
+            st.session_state.message = "Pregunta guardada. Se conserva una copia de seguridad del banco anterior."
             st.rerun()
+    except DataError as error:
+        st.error(str(error))
+        if st.session_state.get("editor_original") is not None:
+            if st.button("Descartar borrador y recargar"):
+                del st.session_state.editor_original
+                st.rerun()
 
 
 if __name__ == "__main__":

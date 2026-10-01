@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>PMLE Quiz | Plan de mejoras</title>
+  <style>
+    :root { color-scheme: dark; --bg:#141719; --surface:#1d2225; --raised:#272e32; --text:#edf1ef; --muted:#b5c0bd; --accent:#9ed6bc; --line:#53625c; --radius:10px; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font:16px/1.65 "Segoe UI",Arial,sans-serif; }
+    a { color:var(--accent); text-underline-offset:4px; }
+    button,input,select { font:inherit; }
+    button,select,input[type="search"] { border:1px solid var(--line); border-radius:var(--radius); background:var(--surface); color:var(--text); padding:10px 14px; }
+    button { cursor:pointer; white-space:nowrap; min-height:44px; }
+    button:hover { background:var(--raised); }
+    button:active { transform:translateY(1px); }
+    button.primary { background:var(--accent); color:var(--bg); border-color:var(--accent); font-weight:650; }
+    :focus-visible { outline:3px solid var(--accent); outline-offset:4px; }
+    input { accent-color:var(--accent); }
+    .skip { position:absolute; left:16px; top:-80px; background:var(--bg); padding:10px; }
+    .skip:focus { top:12px; }
+    .wrap { max-width:1160px; padding:0 32px; margin:auto; }
+    header { padding:52px 0 32px; }
+    .kicker { color:var(--accent); font-weight:650; margin:0 0 12px; }
+    h1 { font-size:clamp(2rem,5vw,3.7rem); letter-spacing:-.04em; line-height:1.1; margin:0 0 18px; max-width:850px; }
+    h2 { font-size:1.8rem; letter-spacing:-.025em; line-height:1.25; margin:0 0 16px; }
+    h3 { font-size:1.16rem; line-height:1.4; margin:0 0 8px; }
+    p { margin:0 0 16px; max-width:78ch; }
+    .muted,small { color:var(--muted); }
+    .lead { font-size:1.15rem; max-width:65ch; }
+    nav { display:flex; flex-wrap:wrap; gap:12px 24px; border-block:1px solid var(--line); padding:16px 0; }
+    section { padding:38px 0; scroll-margin-top:20px; }
+    section + section { border-top:1px solid var(--line); }
+    .summary { display:grid; grid-template-columns:1.3fr 1fr; gap:32px; }
+    .aside { background:var(--surface); border-radius:var(--radius); padding:24px; }
+    ul,ol { padding-left:22px; margin:10px 0; }
+    li { margin:8px 0; }
+    .facts { display:flex; flex-wrap:wrap; gap:16px 36px; margin:24px 0 0; }
+    .facts div { min-width:125px; }
+    .facts dt { color:var(--muted); font-size:.9rem; }
+    .facts dd { margin:0; font-size:1.45rem; font-weight:650; }
+    .choice-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin:20px 0; }
+    .choice-grid article { border:1px solid var(--line); border-radius:var(--radius); padding:24px; }
+    .tag { font-size:.85rem; color:var(--accent); font-weight:600; }
+    .flow { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; padding:0; list-style:none; }
+    .flow li { padding:16px; background:var(--surface); border-radius:var(--radius); margin:0; }
+    .flow strong { display:block; margin-bottom:8px; }
+    .toolbar { display:grid; grid-template-columns:2fr 1fr 1fr; gap:16px; margin:24px 0; }
+    .toolbar label { display:grid; gap:6px; color:var(--muted); }
+    .toolbar input,.toolbar select { width:100%; min-width:0; }
+    .actions { display:flex; flex-wrap:wrap; gap:12px; margin:18px 0; }
+    .notice { border-left:3px solid var(--accent); background:var(--surface); padding:14px 18px; margin:18px 0; overflow-wrap:anywhere; }
+    .proposal { border:1px solid var(--line); border-radius:var(--radius); margin:16px 0; overflow:hidden; }
+    .proposal summary { cursor:pointer; padding:20px; }
+    .proposal summary:hover { background:var(--surface); }
+    .proposal summary .title { font-weight:650; font-size:1.1rem; }
+    .meta { display:block; color:var(--muted); font-size:.88rem; margin:7px 0 0 20px; }
+    .body { padding:0 24px 24px; }
+    .body dl { display:grid; grid-template-columns:130px 1fr; gap:10px 20px; margin:12px 0 20px; }
+    .body dt { color:var(--muted); }
+    .body dd { margin:0; overflow-wrap:anywhere; }
+    code { font: .88em/1.5 Consolas,monospace; overflow-wrap:anywhere; color:var(--accent); }
+    fieldset { margin:0; border:1px solid var(--line); border-radius:var(--radius); padding:12px 16px; }
+    legend { padding:0 6px; font-weight:600; }
+    .decision-options { display:flex; flex-wrap:wrap; gap:8px 24px; }
+    .decision-options label { display:flex; align-items:center; gap:8px; min-height:44px; cursor:pointer; }
+    .decision-options input { width:18px; height:18px; }
+    textarea { font:14px/1.5 Consolas,monospace; background:var(--surface); color:var(--text); border:1px solid var(--line); border-radius:var(--radius); width:100%; padding:16px; margin-top:8px; }
+    .roadmap { counter-reset:step; padding:0; list-style:none; }
+    .roadmap li { display:grid; grid-template-columns:160px 1fr; gap:24px; padding:20px 0; border-bottom:1px solid var(--line); }
+    .roadmap li:last-child { border:0; }
+    footer { border-top:1px solid var(--line); padding:28px 0 40px; color:var(--muted); }
+    [hidden] { display:none !important; }
+    @media(max-width:767px) { .wrap { padding:0 20px; } header { padding-top:32px; } .summary,.choice-grid,.toolbar,.flow { grid-template-columns:1fr; } .body dl { grid-template-columns:1fr; gap:4px; } .body dd { margin-bottom:12px; } .roadmap li { grid-template-columns:1fr; gap:6px; } .body { padding:0 16px 20px; } }
+    @media print { body { font-size:10pt; } .wrap { max-width:none; padding:0; } nav,.toolbar,.actions,fieldset,.skip { display:none; } section { padding:20px 0; } .proposal { break-inside:avoid; } a { color:inherit; } }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#overview">Ir al plan</a>
+  <div class="wrap">
+    <header>
+      <p class="kicker">PMLE Quiz / Plan para aprobar</p>
+      <h1>Mejorar el estudio.<br>Tú decides el alcance.</h1>
+      <p class="lead">Primero, corregir los fallos. Después, mejorar la experiencia y decidir hasta dónde renovar la interfaz.</p>
+    </header>
+    <nav aria-label="Secciones del documento">
+      <a href="#overview">Recomendación</a><a href="#frontend">Opciones de interfaz</a><a href="#proposals">Elegir cambios</a><a href="#sequence">Orden de trabajo</a><a href="#evidence">Evidencias</a>
+    </nav>
+    <main>
+      <section id="overview">
+        <div class="summary">
+          <div>
+            <h2>Primero, que los resultados sean fiables</h2>
+            <p id="recommendation">Hay que asegurar el guardado del progreso, la edición de preguntas y la recuperación de las rondas. Después, renovar la interfaz de Streamlit. Crear otra aplicación web es una opción, no una necesidad.</p>
+            <p><strong>Todavía no hay nada aprobado.</strong> Marca los cambios que quieras y descarga tus decisiones. Este documento no modifica la aplicación, no despliega código y no autoriza trabajo por sí solo.</p>
+          </div>
+          <aside class="aside">
+            <h3>Qué se ha revisado</h3>
+            <p>Tres subagentes revisaron la interfaz y el aprendizaje, la lógica y el progreso, y la instalación y calidad de las preguntas. El agente principal reunió sus informes.</p>
+            <p class="muted">Código revisado: <code>main @ bbc6431</code><br>Fecha: 1 de octubre de 2026<br>Alcance: proyecto local, no un servicio en producción.</p>
+          </aside>
+        </div>
+        <dl class="facts">
+          <div><dt>Propuestas</dt><dd id="total-count">0</dd></div>
+          <div><dt>Aprobadas en el borrador</dt><dd id="approved-count">0</dd></div>
+          <div><dt>Trabajo estimado</dt><dd id="effort-total">0 días</dd></div>
+        </dl>
+        <div id="strengths" class="notice"><strong>Conservar lo que funciona:</strong> 841 preguntas con explicación, 104 productos, identificadores únicos, envío explícito de respuestas, corrección exacta de selección múltiple, controles adaptados al móvil y versiones de dependencias registradas. El modelo actual acepta todas las filas, pero una comprobación más estricta encontró una respuesta con formato incompatible.</div>
+      </section>
+      <section id="frontend">
+        <h2>Renovar la interfaz sin perder lo útil</h2>
+        <p>Es una herramienta de estudio, no una página publicitaria. Lo importante es leer bien las preguntas, entender la corrección y usar controles fiables, también en el móvil.</p>
+        <div class="choice-grid">
+          <article>
+            <p class="tag">Primera opción recomendada / F01</p>
+            <h3>Renovar la aplicación de Streamlit</h3>
+            <p>Mantener Python, simplificar las pantallas, unificar el estilo y mejorar la navegación y la accesibilidad. Reutilizar las preguntas y las funciones útiles.</p>
+            <p><strong>Ideal para:</strong> estudio personal o un despliegue pequeño. Menor coste y menos riesgo al migrar.</p>
+            <p><strong>Límite:</strong> Streamlit seguirá condicionando las interacciones complejas y el control visual.</p>
+            <p class="muted">F01 cubre solo la renovación visual y de navegación. Una entrega con las correcciones, pruebas y accesibilidad relacionadas puede requerir unas 3-6 semanas de trabajo de una persona, según lo aprobado.</p>
+          </article>
+          <article>
+            <p class="tag">Alternativa / F02</p>
+            <h3>Crear una interfaz web independiente</h3>
+            <p>Usar una interfaz accesible conectada a una API de Python. Definir primero cómo se comparten preguntas, intentos y progreso. Migrar un recorrido completo antes de sustituir el resto.</p>
+            <p><strong>Ideal para:</strong> necesidades aprobadas de cuentas, estudio entre dispositivos o interacciones más completas.</p>
+            <p><strong>Coste añadido:</strong> dos aplicaciones, más pruebas, alojamiento y migración. No hace falta para corregir los fallos actuales.</p>
+            <p class="muted">F02 estima 8-14 semanas de trabajo de una persona para conservar las funciones y verificarlas. Las cuentas, el modo sin conexión, la revisión de contenido y las reparaciones de base se añaden aparte.</p>
+          </article>
+        </div>
+        <h3>Recorrido de estudio propuesto</h3>
+        <ol class="flow">
+          <li><strong>Inicio</strong>Continuar una ronda, ver temas débiles o comenzar una práctica corta.</li>
+          <li><strong>Práctica</strong>Leer una pregunta, elegir respuestas y enviarlas con una acción clara.</li>
+          <li><strong>Repaso</strong>Entender la respuesta, marcar dudas y elegir qué volver a estudiar.</li>
+          <li><strong>Progreso</strong>Ver intentos y temas cubiertos sin prometer una nota en el examen real.</li>
+        </ol>
+        <p class="muted" style="margin-top:20px">Se conservan los modos y las exportaciones útiles. Los cambios de navegación, tema y tecnología necesitan aprobación. El modo oscuro de este documento no cambia el tema de la aplicación.</p>
+        <details class="proposal">
+          <summary><span class="title">Diseño propuesto y precauciones al migrar</span></summary>
+          <div class="body">
+            <p><strong>Ahora:</strong> tema nativo de Streamlit, páginas anchas, barra lateral plegada, texto ampliado, ajustes CSS a 700px y 390px, controles móviles de 50px y esquinas redondeadas. No hay un tema propio de colores y tipografía. Algunos gráficos usan un tema claro de Plotly.</p>
+            <p><strong>Propuesta:</strong> una zona de estudio tranquila, tipografía legible del sistema, un solo color de acento, colores con funciones claras, títulos ordenados y poco movimiento. Una columna limpia para la pregunta y un panel secundario de progreso en escritorio; una sola columna en móvil. Sin animaciones decorativas ni página publicitaria antes de practicar.</p>
+            <p><strong>Migración:</strong> conservar identificadores, contenido, imágenes, reglas de corrección y accesos anteriores. En F02, usar React/TypeScript, una base de componentes accesibles y una API de Python. Migrar primero una práctica completa. Cambiar definitivamente solo después de comprobar funciones, datos, teclado, móvil y vuelta a la versión anterior.</p>
+            <p><strong>Criterio de decisión:</strong> reescribir solo si Streamlit no resuelve razonablemente necesidades demostradas de móvil, accesibilidad, uso sin conexión o varios dispositivos. Ajustes propuestos: variedad visual 4/10, movimiento 2/10 y densidad 5/10. Significa distribución predecible, sin animación automática y espacio cómodo; no son puntuaciones medidas de la aplicación actual.</p>
+          </div>
+        </details>
+      </section>
+      <section id="proposals">
+        <h2>Elige qué implementar</h2>
+        <p>Abre cada propuesta para ver la evidencia, el cambio y cómo se comprobará. El esfuerzo se estima en días de trabajo de una persona, no es un presupuesto ni una fecha de entrega.</p>
+        <p class="muted">P0: corregir primero pérdidas de datos o funciones básicas rotas. P1: siguiente entrega. P2: mejora posterior. P3: ampliación opcional. No se incluyen revisión de expertos ni alojamiento. El total suma los trabajos antes de descontar tareas compartidas; sirve de orientación conservadora. Las dos alternativas de interfaz no deben sumarse.</p>
+        <div class="toolbar">
+          <label for="search">Buscar una propuesta<input id="search" type="search" placeholder="Título, efecto o evidencia"></label>
+          <label for="category">Área<select id="category"><option value="">Todas las áreas</option></select></label>
+          <label for="decision-filter">Decisión<select id="decision-filter"><option value="">Todas las decisiones</option><option value="pending">Sin decidir</option><option value="approve">Aprobar</option><option value="later">Más adelante</option><option value="decline">Descartar</option></select></label>
+        </div>
+        <div class="actions">
+          <button id="recommended" type="button">Seleccionar lo recomendado</button>
+          <button id="expand" type="button">Abrir todas</button>
+          <button id="collapse" type="button">Cerrar todas</button>
+        </div>
+        <p id="storage-status" class="muted" role="status"></p>
+        <p id="visible-count" class="muted" aria-live="polite"></p>
+        <div id="proposal-list"></div>
+        <noscript><div class="notice">La lista detallada y los controles necesitan JavaScript. Actívalo en un navegador local para revisar el plan completo. No se enviará nada a un servidor.</div></noscript>
+        <p id="empty" class="notice" hidden>No hay propuestas con estos filtros. Borra la búsqueda o selecciona todas las áreas y decisiones.</p>
+        <div id="dependencies" class="notice" role="status" hidden></div>
+        <div class="actions">
+          <button id="download" class="primary" type="button">Descargar decisiones</button>
+          <button id="show-summary" type="button">Ver resumen</button>
+          <button id="reset" type="button">Borrar elecciones</button>
+        </div>
+        <div id="summary-panel" hidden>
+          <label for="decision-summary">Copia este resumen para solicitar la implementación</label>
+          <textarea id="decision-summary" rows="12" readonly></textarea>
+        </div>
+        <p class="muted">Las elecciones se guardan solo en este navegador si permite almacenamiento local. El archivo JSON descargado permite conservarlas. Descargar no inicia ningún cambio. Comparte el archivo o el resumen cuando quieras aprobar el trabajo.</p>
+      </section>
+      <section id="sequence">
+        <h2>Orden de trabajo y condiciones para avanzar</h2>
+        <ol class="roadmap" id="roadmap">
+          <li><strong>Proteger y reproducir</strong><div>Empezar las pruebas D01 y las exclusiones D05. Hacer copia de seguridad. Reproducir los fallos con datos ficticios y completar C01-C06. Condición: las ediciones inválidas, errores de recuperación y escrituras en conflicto no pueden perder datos en silencio.</div></li>
+          <li><strong>Reparar el uso diario</strong><div>Completar C07-C08 y F03-F04. Añadir C09-C10 y C12 si se aprueban. Condición: iniciar, responder, continuar, guardar, reiniciar, filtrar y exportar producen resultados coherentes y errores comprensibles.</div></li>
+          <li><strong>Elegir la interfaz</strong><div>Aprobar F01 o F02, no ambas por defecto. Acompañar la elegida con F05. Condición: se puede iniciar o continuar antes de recorrer los gráficos; el teclado y las pantallas pequeñas funcionan bien.</div></li>
+          <li><strong>Preparar el despliegue</strong><div>Completar lo aprobado de D02-D06 y D10 antes de ampliar el acceso. Condición: una instalación nueva es reproducible, los volúmenes necesarios están documentados y recrear el contenedor conserva los datos prometidos.</div></li>
+          <li><strong>Mejorar el aprendizaje</strong><div>Usar D07-D09 para ordenar temas, revisar cobertura del examen y registrar fuentes. Añadir L01-L04 si se aprueban. Condición: las recomendaciones explican su base y no garantizan aprobar el examen.</div></li>
+          <li><strong>Ampliar con motivos</strong><div>Considerar cuentas L05, modo sin conexión L06 u optimización D11 cuando exista una necesidad real. Condición: se aprueban expresamente mantenimiento, propiedad de datos, alojamiento y migración.</div></li>
+        </ol>
+        <div class="notice"><strong>Antes de publicar:</strong> guardar una copia de los datos, superar las comprobaciones acordadas, completar una ronda de principio a fin y verificar el despliegue. Conservar la imagen anterior y una copia compatible para poder volver atrás.</div>
+      </section>
+      <section id="evidence">
+        <h2>Qué se comprobó y qué quedó fuera</h2>
+        <div id="audit-evidence">
+          <h3>Tres informes independientes, reunidos</h3>
+          <p><strong>Interfaz:</strong> se revisaron el panel, las otras cuatro páginas, CSS, configuración del tema y listado de recursos. Streamlit AppTest con datos ficticios reprodujo el reinicio que no hace nada, respuestas ya enviadas que siguen editables y un fallo al filtrar productos. Las pruebas principales se repitieron con Streamlit 1.52.2 del repositorio y PyVis instalado. Una prueba de la función de gráficos confirmó que puede excluir el tema más débil.</p>
+          <p><strong>Lógica:</strong> se siguieron modelos, rondas, guardado, edición y exportación. Pruebas en memoria reprodujeron aceptación de datos inválidos, guardado inseguro desde el editor, reenvío tras recuperar una ronda, lectura incorrecta de progreso dañado, valores no booleanos contados como aciertos, actualizaciones perdidas y exportación mal etiquetada. No se afirma que el historial real del usuario esté dañado.</p>
+          <p><strong>Instalación y contenido:</strong> pasaron la validación de configuración de Compose y el análisis de los 10 archivos Python versionados. Los dos conjuntos JSONL se leen y las 841 preguntas pasan el modelo actual, que es permisivo. No se encontraron pruebas, automatización CI ni archivo de licencia versionados. No se construyeron ni arrancaron contenedores durante la auditoría.</p>
+          <details class="proposal">
+            <summary><span class="title">Inventario de contenido y matices importantes</span></summary>
+            <div class="body">
+              <p>841 preguntas: 800 de respuesta única y 41 de selección múltiple. Una de selección múltiple guarda un número en vez de una lista: ID 148, <code>data\quizzes.jsonl:45</code>. No se encontraron identificadores repetidos, enunciados duplicados tras normalizar texto, explicaciones vacías, índices inválidos ni opciones duplicadas tras normalizar texto.</p>
+              <p>10 preguntas no tienen temas GCP y 21 no tienen temas ML. Hay 685 etiquetas GCP y 935 ML distintas, con 47 y 102 grupos que solo cambian mayúsculas o espacios. De 163 etiquetas de producto, 66 no coinciden exactamente con un nombre del catálogo. Algunas son alias o conceptos externos: requieren revisión, no son necesariamente referencias rotas.</p>
+              <p>299 preguntas llevan la etiqueta General. Solo 94 explicaciones contienen una URL. Todas las filas tienen los mismos diez campos, pero ninguna registra de forma estructurada fuente, fecha de revisión o dominio del examen. No se revisó la corrección técnica de cada respuesta ni si existen duplicados de significado.</p>
+              <p>La mediana de lectura y análisis local fue 15,27ms para preguntas y 0,77ms para productos en 15 repeticiones. Son tiempos parciales favorecidos por la caché del sistema, no tiempos de carga de la aplicación. Por sí solos no justifican cambiar de base de datos o reescribir la interfaz.</p>
+            </div>
+          </details>
+          <p><strong>Temario oficial:</strong> la <a href="https://cloud.google.com/learn/certification/machine-learning-engineer" target="_blank" rel="noopener noreferrer">página de certificación PMLE de Google Cloud</a> incluye IA convencional y generativa, modelos fundacionales, instrucciones y contexto, IA responsable, despliegue, supervisión y optimización. No se pudo verificar la guía detallada enlazada porque el destino consultado devolvió 404. No se presentan porcentajes exactos de los dominios actuales.</p>
+          <p><strong>Límites:</strong> no se leyó el progreso real, la caché ni las exportaciones del usuario. No se probó producción. La aplicación no se inspeccionó visualmente en un navegador: posibles recortes, contraste, adaptación móvil y accesibilidad quedan como objetivos de comprobación. Un caso con un solo intento no falló en Streamlit 1.60; no se afirma que ese caso provoque un error del selector.</p>
+          <p><strong>Este documento:</strong> funciona sin recursos remotos. Sus filtros, decisiones, almacenamiento, descargas, avisos de dependencias y adaptación a pantallas pequeñas se comprueban por separado de la aplicación.</p>
+        </div>
+        <h3>Cómo interpretar los resultados</h3>
+        <p><strong>Confirmado:</strong> demostrado por el código o una prueba local segura. <strong>Riesgo:</strong> fallo posible por cómo está escrito el código, no incidente demostrado en producción. <strong>Oportunidad:</strong> función o decisión de diseño propuesta, no un error.</p>
+        <p>Es una revisión amplia del repositorio, no una garantía de encontrar toda mejora posible, una prueba de intrusión, una validación oficial de las preguntas ni una auditoría medida de rendimiento y accesibilidad. No subas preguntas o historial a servicios externos sin decidir antes sobre permisos y privacidad.</p>
+      </section>
+    </main>
+    <footer>Documento para revisar y decidir. No se han cambiado los archivos de la aplicación ni el progreso existente.</footer>
+  </div>
+  <script id="plan-data" type="application/json">
+  [
+    {
+      "id":"C01","title":"Validar preguntas y corregir por identificador de opción","area":"Fiabilidad","priority":"P0","kind":"Confirmado","days":[0.5,1.5],"suggested":true,"deps":[],
+      "impact":"Un formato de respuesta incorrecto puede romper una ronda o alterar la nota. Dos opciones con el mismo texto no se distinguen bien.",
+      "evidence":"models\\questions.py:6-12 acepta ejemplos inválidos. pages\\3_🤔_Quiz_Mode.py:91-114 presupone el formato según el modo; la línea 96 busca la primera opción con ese texto. Hay un caso real incompatible: ID 148, multiple_choice con un entero, en data\\quizzes.jsonl:45. Las opciones duplicadas solo se probaron con datos ficticios.",
+      "work":"Validar modo, opciones no vacías e índices enteros dentro del rango. Guardar una lista para selección múltiple y un número para respuesta única. Corregir ID 148 tras comprobar su intención, sin adivinar la respuesta. Vincular controles a índices y conservar metadatos.",
+      "accept":"Los formatos inválidos muestran errores claros; las preguntas válidas cargan; las opciones con igual texto se distinguen; se conserva la corrección exacta de selección múltiple.",
+      "risk":"Comprobar el banco antes de endurecer las reglas. Separar filas inválidas con diagnóstico, sin descartar contenido en silencio."
+    },
+    {
+      "id":"C02","title":"Editar preguntas sin romper sus respuestas","area":"Fiabilidad","priority":"P0","kind":"Confirmado","days":[0.5,1],"suggested":true,"deps":["C01","C05"],
+      "impact":"Guardar sin respuesta puede fallar. Dejar una sola respuesta en selección múltiple puede guardar un formato incompatible.",
+      "evidence":"pages\\4_📝_Edit_Questions.py:61-70,99-103 usa casillas para ambos modos y elige el formato según cuántas estén marcadas. Pruebas de las funciones reprodujeron IndexError sin selección y el guardado de un número incompatible.",
+      "work":"Usar controles adecuados a cada modo y validar Question antes de escribir. Mantener listas en selección múltiple. Añadir errores junto al campo, Cancelar y una regla clara para cambios sin guardar.",
+      "accept":"Sin selección no se escribe; respuesta única no admite varias; selección múltiple conserva la lista; cambiar de pregunta no guarda el borrador anterior por accidente.",
+      "risk":"No sobrescribir todo el banco desde una copia antigua del editor. Usar el guardado protegido de C05."
+    },
+    {
+      "id":"C03","title":"Continuar una ronda sin cambiar respuestas enviadas","area":"Fiabilidad","priority":"P0","kind":"Confirmado","days":[1,2],"suggested":true,"deps":["C01","C04"],
+      "impact":"Tras recuperar una ronda, se puede volver a corregir una pregunta enviada. También puede cambiar la selección visible sin cambiar la corrección anterior.",
+      "evidence":"utils\\session.py:13-32 guarda posición y resultados, pero no las selecciones ni el estado de envío. Una prueba permitió sustituir un fallo por un acierto al recuperar. AppTest confirmó controles editables después de enviar.",
+      "work":"Guardar un único registro de ronda con versión, preguntas, posición, borradores y respuestas enviadas. Deducir el estado desde los envíos, bloquear los controles ya enviados y validar la posición recuperada.",
+      "accept":"Recargar antes o después de enviar conserva el estado. Una pregunta enviada no se vuelve a puntuar. Funcionan los saltos, la última pregunta y la recuperación de rondas terminadas.",
+      "risk":"Definir compatibilidad con rondas antiguas. Conservar los datos para recuperarlos, no convertir cualquier error en una ronda vacía."
+    },
+    {
+      "id":"C04","title":"Definir a quién pertenece cada ronda guardada","area":"Fiabilidad","priority":"P0","kind":"Riesgo","days":[1,2],"suggested":true,"deps":[],
+      "impact":"La caché compartida permite que distintos navegadores o usuarios sobrescriban o borren la ronda de otro.",
+      "evidence":"utils\\session.py:6,20-43 usa un espacio global, lo recarga al ejecutar la página y actualiza campos separados. Esto se ve en el código; no se reprodujo un incidente real con varios usuarios.",
+      "work":"En el alcance inicial, declarar un único usuario local y detectar conflictos del mismo perfil. Guardar la ronda completa de forma atómica y con revisión. Para uso compartido, aprobar identidades y separación por perfil antes de publicar.",
+      "accept":"El despliegue coincide con el modelo documentado. Se rechazan o resuelven actualizaciones antiguas; una interrupción no mezcla campos. Si hay perfiles, ninguno lee o borra los datos de otro.",
+      "risk":"Elegir un perfil local no equivale a autenticarse. El acceso público multiusuario necesita la propuesta de cuentas. Un identificador del navegador no garantiza continuar en otro dispositivo."
+    },
+    {
+      "id":"C05","title":"Proteger el guardado del progreso y las preguntas","area":"Fiabilidad","priority":"P0","kind":"Confirmado","days":[1,2],"suggested":true,"deps":[],
+      "impact":"Una interrupción puede dañar un archivo. Dos guardados pueden perder cambios sin avisar.",
+      "evidence":"utils\\__init__.py:53-56 escribe directamente; pages\\3_🤔_Quiz_Mode.py:17-20 lee y actualiza sin bloqueo; el editor, línea 103, reescribe el banco. Una prueba en memoria con dos escritores perdió la primera actualización.",
+      "work":"Centralizar el guardado. Validar antes, bloquear toda la operación de lectura y actualización, sustituir el archivo de forma atómica y conservar una copia válida. Detectar ediciones antiguas por revisión. Considerar SQLite solo si las necesidades aprobadas lo justifican.",
+      "accept":"Se conservan cambios simultáneos independientes; las ediciones incompatibles muestran un conflicto claro; los fallos simulados conservan datos previos y resultados pendientes para reintentar.",
+      "risk":"Sustituir un archivo de forma atómica no evita por sí solo perder actualizaciones. Proteger toda la operación y probar la restauración de las copias."
+    },
+    {
+      "id":"C06","title":"Recuperar el progreso dañado en vez de borrarlo","area":"Fiabilidad","priority":"P0","kind":"Confirmado","days":[1,2],"suggested":true,"deps":["C05"],
+      "impact":"Un archivo ilegible se trata como progreso vacío y puede sobrescribirse. Valores inválidos pueden contarse como aciertos.",
+      "evidence":"utils\\__init__.py:42-50 devuelve un mapa vacío para JSON dañado o claves no enteras; líneas 59-64 evalúan el valor como verdadero/falso sin exigir booleanos. Pruebas confirmaron pérdida del mapa por una clave inválida y el texto false contado como acierto.",
+      "work":"Distinguir archivo ausente, dañado e inaccesible. Validar resultados booleanos y bloquear escrituras hasta resolver el daño. Añadir formato versionado, migración que conserve el original y restauración desde copia.",
+      "accept":"El historial antiguo válido migra sin cambiar resultados. No se sobrescriben datos inválidos. Repetir la migración es seguro y los errores de permisos se explican.",
+      "risk":"No se inspeccionó el archivo real de progreso. Empezar siempre con copia de seguridad y comprobaciones de compatibilidad, sin asumir su contenido."
+    },
+    {
+      "id":"C07","title":"Hacer que la confirmación de reinicio funcione","area":"Fiabilidad","priority":"P1","kind":"Confirmado","days":[0.5,1],"suggested":true,"deps":["C03","C06"],
+      "impact":"Pulsar Sí después de reiniciar no hace nada. Además, una ronda antigua podría volver a añadir progreso después del borrado.",
+      "evidence":"🏠_Dashboard.py:33-41 anida la confirmación dentro de un estado temporal del primer botón. AppTest reprodujo que la confirmación desaparece sin ejecutar el reinicio.",
+      "work":"Usar confirmación persistente o un diálogo con Cancelar. Separar borrar historial de descartar ronda activa y explicar qué se va a borrar. Conservar una copia recuperable.",
+      "accept":"Cancelar no cambia datos; confirmar actúa una sola vez; recargar no confirma por accidente; rondas antiguas no restauran en silencio lo borrado.",
+      "risk":"El alcance del reinicio es una decisión funcional. Se propone control explícito, no borrar todos los datos sin avisar."
+    },
+    {
+      "id":"C08","title":"Unificar iniciar, continuar, terminar y descartar","area":"Fiabilidad","priority":"P1","kind":"Confirmado","days":[1,2],"suggested":true,"deps":["C03","C04"],
+      "impact":"Iniciar puede recargar una ronda antigua. Guardar puede devolver a configuración en vez del destino esperado; pueden quedar selecciones de otra ronda.",
+      "evidence":"🏠_Dashboard.py:24-28 limpia memoria, pero utils\\session.py:20-24 recarga caché. Quiz:25-30 no limpia todos los controles; :70-84 usa posiciones como claves; :54,57,151,154 apunta al inexistente app.py. En AppTest, guardar volvió a configuración sin excepción: no se afirma un fallo de navegación reproducido.",
+      "work":"Crear Continuar y Nueva ronda explícitos, transiciones compartidas, claves por ronda y pregunta, limpieza completa y un destino válido al guardar con mensaje duradero.",
+      "accept":"Si existe una ronda guardada, se ofrece una elección clara. Reiniciar no conserva selecciones antiguas. Guardar al parar o terminar actúa una vez y navega bien. Descartar nunca confirma respuestas.",
+      "risk":"Conservar la diferencia entre recuperación de una ronda y progreso confirmado. Explicarla mejor, sin cambiar el guardado en silencio."
+    },
+    {
+      "id":"C09","title":"Vincular el progreso a versiones estables de preguntas","area":"Fiabilidad","priority":"P1","kind":"Riesgo","days":[1,2],"suggested":false,"deps":["C01","C03","C06"],
+      "impact":"Eliminar preguntas, reutilizar identificadores o editar respuestas puede falsear la cobertura o vincular resultados a contenido antiguo.",
+      "evidence":"utils\\__init__.py:24-35 no exige identificadores únicos en todo el banco. Quiz:50,145-147 agrupa por ID; dashboard.py:12-14 cuenta todas las claves del progreso. No hay IDs duplicados actualmente: esa parte es preventiva.",
+      "work":"Exigir IDs únicos e inmutables y registrar revisiones del contenido. Detectar rondas antiguas tras editar. Excluir IDs retirados de la cobertura actual sin borrar su historial.",
+      "accept":"Se rechazan IDs duplicados; retirar preguntas no genera pendientes negativos; se detectan respuestas desactualizadas; el historial sigue siendo recuperable.",
+      "risk":"No recalcular respuestas antiguas contra contenido nuevo sin avisar. Se puede mantener el último resultado hasta aprobar un historial de intentos."
+    },
+    {
+      "id":"C10","title":"Cargar y validar preguntas de la misma forma","area":"Fiabilidad","priority":"P1","kind":"Confirmado","days":[1,2],"suggested":false,"deps":["C01","C05","C06"],
+      "impact":"Las páginas pueden discrepar sobre las preguntas disponibles o fallar con archivos vacíos, ausentes o dañados.",
+      "evidence":"utils\\__init__.py:24-38 registra y salta filas inválidas; dashboard.py:32,100-101 y editor:18 leen datos sin esa validación. Editor:30-34 accede a una fila de una tabla vacía; :8,12 carga además caché de rondas ajena a la edición.",
+      "work":"Crear una pequeña capa compartida que devuelva preguntas validadas y errores por fila. Usarla en todas las páginas, mostrar filas omitidas, manejar estados vacíos y quitar la dependencia del editor respecto a la caché de rondas.",
+      "accept":"Todas las páginas muestran cantidades coherentes. Archivos vacíos, ausentes o parcialmente dañados dan mensajes útiles. Una ronda dañada no bloquea editar preguntas.",
+      "risk":"Reutilizar un cargador sencillo, no añadir una arquitectura grande. Editar y consultar pueden necesitar políticas de error diferentes."
+    },
+    {
+      "id":"C11","title":"Hacer predecible la selección de preguntas","area":"Aprendizaje","priority":"P2","kind":"Confirmado","days":[0.5,1],"suggested":false,"deps":["C09","C10"],
+      "impact":"Los fallos se excluyen por defecto y repasar aciertos depende de activar los fallos. Un porcentaje pequeño puede seleccionar cero preguntas.",
+      "evidence":"pages\\3_🤔_Quiz_Mode.py:175-185,194-205 vincula esos controles y redondea hacia abajo. Con tres aciertos y un 10 por ciento, la prueba seleccionó cero. El muestreo aleatorio en sí es razonable.",
+      "work":"Extraer una función comprobable. Separar pendientes, fallos y repaso de aciertos; explicar el redondeo y mostrar cuántas preguntas son elegibles.",
+      "accept":"Pruebas con semilla cubren grupos vacíos, controles independientes, 0/10/100 por ciento, ausencia de duplicados y datos originales intactos. La vista previa coincide con la ronda.",
+      "risk":"Cambia valores iniciales del estudio. Mantener los anteriores hasta aprobar los nuevos; no añadir ponderaciones sin decidirlo."
+    },
+    {
+      "id":"C12","title":"Hacer que la exportación coincida con su nombre","area":"Aprendizaje","priority":"P1","kind":"Confirmado","days":[0.5,1],"suggested":false,"deps":["C01","C10"],
+      "impact":"La exportación promete preguntas sin responder, pero contiene preguntas falladas. Eso confunde el siguiente repaso.",
+      "evidence":"pages\\5_🇦🇮_Export_for_LM.py:21-23 filtra fallos; :48-51 etiqueta la salida como pendientes. Una prueba confirmó la diferencia. Generación y descarga están dentro de una acción temporal del botón.",
+      "work":"Llamar a la operación Preguntas falladas o añadir alcances explícitos. Alinear título, nombre de archivo, cantidad y contenido. Mantener la descarga entre ejecuciones y ofrecer explicaciones y etiquetas validadas.",
+      "accept":"Cada alcance exporta exactamente sus IDs; se explica una salida vacía; descargar varias veces funciona; ambas modalidades de respuesta son válidas y no dependen de HTML sin procesar.",
+      "risk":"Exportar no concede permisos de redistribución. Subirlo a una IA externa exige decidir aparte sobre contenido y privacidad."
+    },
+    {
+      "id":"F01","title":"Renovar la interfaz actual de Streamlit","area":"Interfaz","priority":"P1","kind":"Oportunidad","days":[3,5],"suggested":true,"deps":["C03","C08"],
+      "impact":"La acción de practicar aparece después de los gráficos y la navegación depende de una barra lateral plegada. Entrar a estudiar debería ser más directo.",
+      "evidence":"🏠_Dashboard.py:15 muestra análisis antes del botón Start de la línea 19. dashboard.py:20-24 añade varios gráficos. Las páginas usan distribución ancha y barra plegada; .streamlit\\config.toml:2-3 no declara tema propio. No se midió cuánto hay que desplazarse en móvil.",
+      "work":"Colocar Iniciar/Continuar primero, mostrar los destinos de estudio y separar Progreso detallado y gestión de preguntas. Unificar tema, espacios, nombres y navegación. Mantener controles nativos y contenido.",
+      "accept":"Iniciar o Continuar aparece antes de los análisis. Se mantienen funciones y accesos anteriores. Editar queda separado de estudiar. Todas las pantallas comparten reglas visuales y estados.",
+      "risk":"Es alternativa a F02, no un paso obligatorio antes de ella. La estimación cubre diseño y navegación; fiabilidad y accesibilidad se presupuestan aparte."
+    },
+    {
+      "id":"F02","title":"Sustituir la interfaz por una aplicación web independiente","area":"Interfaz","priority":"P3","kind":"Oportunidad","days":[40,70],"suggested":false,"deps":["C01","C03","C05","C06","C08","C10","D01"],
+      "impact":"Permite navegación móvil y control del foco más completos, y facilita un futuro modo sin conexión, pero aumenta mucho el mantenimiento.",
+      "evidence":"Las páginas mezclan presentación Streamlit y operaciones del dominio. No se encontró una necesidad demostrada que obligue a reescribir. Es una alternativa de arquitectura, no una reparación.",
+      "work":"Crear React/TypeScript conectado a una API Python con contratos de preguntas, intentos y progreso. Usar una base accesible de componentes. Migrar práctica, progreso, productos, edición, exportaciones y recursos, conservando accesos y vuelta atrás.",
+      "accept":"Se mantienen las funciones en pruebas con datos ficticios; la migración conserva IDs e historial; pasan pruebas reales con teclado y móvil; se ensaya volver atrás y se documenta el alojamiento.",
+      "risk":"Elegir en lugar de F01 salvo plan gradual explícito. Son 8-14 semanas de trabajo para conservar funciones y validarlas. Cuentas, modo sin conexión y reparaciones de base añaden alcance. No contar dos veces tareas de accesibilidad compartidas."
+    },
+    {
+      "id":"F03","title":"Evitar que el filtro de productos rompa la página","area":"Interfaz","priority":"P0","kind":"Confirmado","days":[0.5,1.5],"suggested":true,"deps":[],
+      "impact":"Excluir el producto seleccionado con un filtro puede mostrar una página de error.",
+      "evidence":"pages\\2_☁️_GCP_Products.py:163-187 filtra productos, pero el selector de detalles sigue ofreciendo todos los nombres. next() falla en la línea 187. AppTest reprodujo StopIteration en Streamlit 1.52.2 del repositorio, con PyVis instalado.",
+      "work":"Ofrecer detalles solo de productos filtrados, conservar una selección válida cuando sea posible y explicar cuándo no hay coincidencias.",
+      "accept":"Pasan casos con cero, uno y varios productos. Excluir el seleccionado no falla y el detalle mostrado siempre pertenece al filtro activo.",
+      "risk":"Conservar contenido y matriz actuales. No hace falta rehacer el grafo para resolverlo."
+    },
+    {
+      "id":"F04","title":"Mostrar los temas que realmente necesitan repaso","area":"Interfaz","priority":"P1","kind":"Confirmado","days":[1,2],"suggested":true,"deps":[],
+      "impact":"El gráfico de los primeros K temas puede omitir el más débil y recomendar mal las prioridades.",
+      "evidence":"dashboard.py:162-183 ordena para mostrar antes de aplicar head(top_k). Con seis valores ficticios de 1,0 a 0,5 y K=5, la función omitió 1,0. Hay que comprobar también los demás modos.",
+      "work":"Elegir primero los K temas adecuados y después ordenarlos visualmente. Mostrar tamaño de muestra, etiquetas claras y estados vacíos. No presentar cobertura o último resultado como preparación garantizada para el examen.",
+      "accept":"Los temas peores o más frecuentes aparecen según el modo elegido. Los números coinciden con un resumen de texto o tabla y muestran sobre cuántas respuestas se calculan. Los filtros vacíos orientan al usuario.",
+      "risk":"Corrige el orden, no los nombres de temas ni las limitaciones del historial actual. Eso se trata por separado."
+    },
+    {
+      "id":"F05","title":"Comprobar accesibilidad y uso en móvil","area":"Interfaz","priority":"P1","kind":"Riesgo","days":[3,6],"suggested":true,"deps":["C03","C08"],
+      "impact":"Opciones largas, imágenes, gráficos y recargas deben funcionar con teclado, ampliación y pantallas pequeñas.",
+      "evidence":"style.css:35-49,119-139 depende de detalles internos de Streamlit/BaseWeb; dashboard.py:35,109 repite títulos principales; :83-85,210-211 usa plotly_white. Ya existen controles de 50px y reducción de movimiento. No se confirmaron problemas de recorte o contraste en navegador.",
+      "work":"Conservar esas ventajas, ordenar encabezados, adaptar gráficos al tema y añadir resúmenes de texto. Limitar CSS a lo necesario. Probar foco y avisos tras cada ejecución con textos largos e imágenes.",
+      "accept":"Se completa una ronda solo con teclado; el foco es visible; texto y controles cumplen WCAG AA; a 320px y con zoom del 200 por ciento no hay desplazamiento lateral innecesario; ambos temas son legibles y las imágenes tienen alternativas adecuadas.",
+      "risk":"Los selectores internos de Streamlit no son una API visual estable. Probar cada actualización en vez de acumular reglas CSS generales."
+    },
+    {
+      "id":"D01","title":"Añadir pruebas y comprobaciones automáticas","area":"Instalación y entrega","priority":"P1","kind":"Confirmado","days":[2,4],"suggested":true,"deps":[],
+      "impact":"No hay una batería de pruebas versionada que evite que vuelvan los fallos reproducidos.",
+      "evidence":"No se encontraron pruebas, flujo CI ni configuración de análisis y pruebas. pyproject.toml:7-14 solo enumera dependencias de la aplicación. utils\\__init__.py:24-38 puede saltar filas inválidas y aun así arrancar.",
+      "work":"Crear pruebas unitarias y AppTest con datos ficticios para los fallos. Añadir validación del banco completo, análisis del código, comprobación del archivo de versiones y CI. Tras corregir la imagen, probar arranque y salud del contenedor.",
+      "accept":"Cada corrección tiene prueba de regresión. CI verifica banco, recuperación, corrección, estados vacíos y dependencias sin leer progreso real. Se prueban versiones Python soportadas y los volúmenes del contenedor.",
+      "risk":"La validación estricta debe detectar ID 148 hasta corregir C01. No debilitar las pruebas para que pasen; introducirlas junto a las reparaciones."
+    },
+    {
+      "id":"D02","title":"Instalar la aplicación completa en el devcontainer","area":"Instalación y entrega","priority":"P1","kind":"Confirmado","days":[0.5,1],"suggested":true,"deps":[],
+      "impact":"Un contenedor de desarrollo nuevo puede instalar Streamlit sin el resto de las dependencias declaradas.",
+      "evidence":".devcontainer\\devcontainer.json:20 busca un requirements.txt no versionado y después instala solo Streamlit; puede anunciar éxito tras un fallo anterior. Usa Python 3.11, mientras Dockerfile:1 usa 3.13.",
+      "work":"Elegir una versión de uv, usar el archivo de versiones del repositorio y detener la preparación si falla. Arrancar desde ese entorno. Unificar versiones Python o comprobar ambas.",
+      "accept":"Un devcontainer limpio abre todas las páginas. Un error al instalar devuelve fallo. No queda instalación separada de Streamlit sin versión controlada. Las versiones soportadas están documentadas.",
+      "risk":"El entorno virtual actual sí tiene las dependencias. Este hallazgo afecta a una instalación nueva, no afirma que falte PyVis en el repositorio actual."
+    },
+    {
+      "id":"D03","title":"Aclarar el arranque y las dependencias directas","area":"Instalación y entrega","priority":"P2","kind":"Confirmado","days":[0.5,1.5],"suggested":false,"deps":[],
+      "impact":"El comando quiz declarado no está instalado y una importación directa depende de paquetes que llegan indirectamente.",
+      "evidence":"pyproject.toml:16-18 declara quiz sin sistema de empaquetado; uv.lock:1163-1165 marca el proyecto como virtual. No hay comando quiz registrado. pages\\2_☁️_GCP_Products.py:5 importa networkx directamente.",
+      "work":"Preferir el arranque Streamlit ya documentado y retirar la promesa del comando si no hace falta empaquetar. Si se quiere una CLI, crear un lanzador instalable de nombre ASCII. Declarar explícitamente las dependencias importadas.",
+      "accept":"Funciona un arranque soportado en un entorno limpio. Si se conserva quiz, inicia realmente Streamlit. Se comprueban dependencias y recursos incluidos.",
+      "risk":"Empaquetar la aplicación es opcional. No añadir herramientas de distribución solo por mantener una declaración sin uso."
+    },
+    {
+      "id":"D04","title":"Construir contenedores reproducibles","area":"Instalación y entrega","priority":"P1","kind":"Confirmado","days":[1,2],"suggested":false,"deps":["D01","D05"],
+      "impact":"Cambiar código obliga a reinstalar dependencias; no se exige respetar las versiones fijadas y la imagen sola no contiene las preguntas.",
+      "evidence":"Dockerfile:1 usa una base variable; :6,10 copia todo antes de uv sync; :17 invoca uv al arrancar. .dockerignore:2 excluye data y docker-compose.yaml:10-11 lo monta. La configuración Compose es válida, pero no se construyó la imagen.",
+      "work":"Instalar primero desde los manifiestos exigiendo el archivo de versiones, copiar código después y ejecutar el entorno instalado sin resolver paquetes al arrancar. Controlar la base y explicar si los datos deben montarse aparte.",
+      "accept":"Cambiar solo código reutiliza dependencias; inconsistencias de versiones fallan al construir; se arranca sin consultar paquetes externos; se prueba la salud de la imagen y los volúmenes documentados.",
+      "risk":"Comprobar que curl u otras herramientas de salud estén instaladas. Una configuración Compose válida no demuestra que el despliegue funcione."
+    },
+    {
+      "id":"D05","title":"Excluir progreso y secretos de Git y de las imágenes","area":"Instalación y entrega","priority":"P1","kind":"Confirmado","days":[0.5,1],"suggested":true,"deps":[],
+      "impact":"El progreso generado puede añadirse a Git por accidente. Caché o configuración privada pueden entrar en la imagen Docker.",
+      "evidence":".gitignore:218-224 no excluye data\\progress.json, que ya estaba sin versionar. .dockerignore:1-10 no excluye .git, cache ni .streamlit\\secrets.toml y Dockerfile:6 copia el contexto. No se inspeccionaron secretos.",
+      "work":"Añadir exclusiones precisas para estado del usuario, configuración privada, metadatos Git y archivos generados conocidos. Mantener disponibles los recursos públicos necesarios.",
+      "accept":"git check-ignore reconoce progress.json. El inventario del contexto excluye archivos privados y generados, pero conserva recursos necesarios. No se borran archivos existentes del usuario.",
+      "risk":"Es prevención, no evidencia de filtración de credenciales. No excluir todo el banco de preguntas de Git indiscriminadamente."
+    },
+    {
+      "id":"D06","title":"Separar uso local y despliegue compartido","area":"Instalación y entrega","priority":"P1","kind":"Riesgo","days":[1,3],"suggested":false,"deps":["C04","C05","D04"],
+      "impact":"El despliegue puede exponer un editor pensado para un usuario y guardar las rondas solo dentro de un contenedor reemplazable.",
+      "evidence":"docker-compose.yaml:9 publica 8501 en todas las interfaces; :11 permite escribir en todo el contenido; :13 desactiva CORS. .devcontainer\\devcontainer.json:22 desactiva CORS y XSRF. utils\\session.py:6 usa cache, pero Compose solo conserva data.",
+      "work":"Para uso local, escuchar solo en la propia máquina. Mantener protecciones normales salvo necesidad comprobada. Separar contenido, progreso y rondas, conservar el estado prometido y documentar restricciones al alojarlo.",
+      "accept":"El valor local inicial usa loopback; recrear conserva los datos prometidos; los permisos de edición son intencionales; el acceso remoto tiene control explícito y límites de usuarios definidos.",
+      "risk":"Son riesgos observados en configuración, no una evaluación de ataques. El alojamiento público multiusuario necesita L05 o un diseño de acceso equivalente aprobado."
+    },
+    {
+      "id":"D07","title":"Unificar nombres de temas y productos","area":"Contenido","priority":"P2","kind":"Confirmado","days":[2,4],"suggested":false,"deps":["C01","C09","D01"],
+      "impact":"Distintas formas de escribir lo mismo separan un concepto en los gráficos y empeoran la práctica por tema.",
+      "evidence":"data\\quizzes.jsonl:1,237 cambia mayúsculas de Model training; :56,3 usa BigQueryML y BigQuery ML. Hay 47 grupos GCP y 102 ML que solo cambian espacios o mayúsculas. 66 etiquetas de producto no coinciden exactamente con nombres del catálogo.",
+      "work":"Crear identificadores canónicos y alias explícitos. Distinguir productos, tecnologías externas, conceptos generales y nombres antiguos. Conservar etiquetas originales e IDs de preguntas.",
+      "accept":"Los gráficos usan IDs canónicos; cada etiqueta se resuelve o declara como externa/general; se eliminan duplicaciones no justificadas; CI detecta alias desconocidos.",
+      "risk":"Un nombre que no coincide no es necesariamente incorrecto. Revisar manualmente para no borrar diferencias importantes al renombrar en bloque."
+    },
+    {
+      "id":"D08","title":"Relacionar las preguntas con el temario actual","area":"Contenido","priority":"P2","kind":"Oportunidad","days":[2,4],"suggested":false,"deps":["D07"],
+      "impact":"Tener muchas preguntas no garantiza cubrir el PMLE actual, especialmente los temas nuevos de IA generativa.",
+      "evidence":"data\\quizzes.jsonl:1-841 no registra dominio ni versión del examen. La búsqueda de palabras encontró pocas menciones de varios temas nuevos, pero no mide cobertura por significado. La página oficial incluye IA generativa; no se verificaron los pesos exactos de la guía actual.",
+      "work":"Registrar una guía oficial accesible y fechada; asignar dominios y subdominios con revisión experta; separar material complementario. Añadir preguntas originales revisadas donde se confirmen carencias.",
+      "accept":"Se distinguen áreas cubiertas, pendientes de revisión y ausentes. Cada asignación conserva la versión de la guía. La cobertura de IA generativa se revisa de verdad, no solo contando palabras.",
+      "risk":"La estimación cubre herramientas y preparación del informe. Revisar 841 preguntas y crear contenido requiere trabajo experto adicional; no se promete hacerlo en 2-4 días ni validación oficial."
+    },
+    {
+      "id":"D09","title":"Registrar fuentes, permisos y revisión del contenido","area":"Contenido","priority":"P1","kind":"Riesgo","days":[1,3],"suggested":false,"deps":["C01"],
+      "impact":"Sin fuentes, fechas de revisión y condiciones de distribución es difícil mantener o publicar contenido con garantías.",
+      "evidence":"No se encontró licencia versionada. Las 841 filas carecen de metadatos estructurados de origen y revisión; solo 94 explicaciones contienen una URL. README.md:86-91 recomienda exportar a un servicio externo.",
+      "work":"Documentar por separado licencias del código y de las preguntas. Añadir autoría, fuente y estado de revisión; enlazar referencias fiables y revisar orientación obsoleta. Explicar permisos y privacidad al exportar.",
+      "accept":"El propietario resuelve las condiciones de distribución. Cada elemento conserva fuente o estado explícito de autoría/revisión. Se pueden detectar referencias antiguas y la documentación cubre privacidad.",
+      "risk":"La ausencia de metadatos no demuestra infracción. La estimación técnica no incluye revisión jurídica o experta. No inventar licencias, fuentes ni permisos."
+    },
+    {
+      "id":"D10","title":"Actualizar instrucciones de instalación y uso","area":"Instalación y entrega","priority":"P2","kind":"Confirmado","days":[0.5,1.5],"suggested":false,"deps":["D03","C08"],
+      "impact":"Las instrucciones usan comandos de determinados sistemas y describen datos y guardado de forma incompleta.",
+      "evidence":"README.md:97 describe cuatro campos y solo respuestas numéricas; las filas reales tienen diez campos y también listas. :32-33,54-65 depende del intérprete de comandos; :81-83,103 necesita aclarar guardado. Dockerfile:16 menciona otro lanzador.",
+      "work":"Documentar instalación con versiones fijadas, Python soportado, comandos PowerShell y Unix, esquema completo, edición, copias y diferencia entre ronda recuperable y resultados confirmados. Explicar los volúmenes necesarios.",
+      "accept":"Las instrucciones nuevas funcionan en Windows y un entorno Unix. Los ejemplos incluyen ambos modos de respuesta. Guardar, continuar, borrar y restaurar coinciden con la aplicación.",
+      "risk":"Cada corrección debe actualizar su documentación relacionada al hacerla. Esta propuesta es la revisión general, no permite dejar instrucciones de una reparación desactualizadas."
+    },
+    {
+      "id":"D11","title":"Optimizar solo lo que resulte lento al medirlo","area":"Instalación y entrega","priority":"P3","kind":"Oportunidad","days":[1,2],"suggested":false,"deps":["C10"],
+      "impact":"Se repite la lectura del contenido, pero no se ha demostrado que sea la causa principal de lentitud.",
+      "evidence":"utils\\__init__.py:24-28, dashboard.py:31-33 y la página de productos:22-27 leen datos por separado. Medianas locales: 15,27ms en preguntas y 0,77ms en productos, no tiempos de interacción completa.",
+      "work":"Medir arranque y recargas primero. Cachear contenido validado e inmutable con invalidación por revisión al editar. No compartir progreso ni rondas mutables en caché. Reducir trabajo de gráficos solo si lo justifican las mediciones.",
+      "accept":"Las medidas antes/después muestran una mejora útil; editar invalida enseguida la caché; las sesiones no alteran objetos compartidos y la corrección no cambia.",
+      "risk":"No cambiar de base de datos ni reescribir la interfaz solo para ahorrar unos milisegundos de análisis."
+    },
+    {
+      "id":"L01","title":"Ofrecer prácticas cortas y centradas en un tema","area":"Aprendizaje","priority":"P2","kind":"Oportunidad","days":[2,4],"suggested":false,"deps":["C11","D07"],
+      "impact":"Elegir cuántas preguntas y sobre qué tema facilita estudiar en ratos libres.",
+      "evidence":"pages\\3_🤔_Quiz_Mode.py:157-204 selecciona grupos por estado, pero no ofrece el recorrido completo propuesto con límite y filtros de temas y productos.",
+      "work":"Añadir límite de preguntas, filtros con nombres canónicos y vista previa. Desde los temas débiles, permitir abrir directamente una práctica adecuada.",
+      "accept":"Vista previa y ronda coinciden; no se repiten preguntas; se explica qué hacer si faltan preguntas; siguen disponibles las opciones anteriores.",
+      "risk":"La duración aproximada debe presentarse como estimación, no como velocidad personal medida si no existe historial suficiente."
+    },
+    {
+      "id":"L02","title":"Añadir repaso de ronda y simulacro opcional","area":"Aprendizaje","priority":"P2","kind":"Oportunidad","days":[3,6],"suggested":false,"deps":["C03","C08","C11"],
+      "impact":"Conviene volver a preguntas saltadas o falladas. Algunos usuarios también querrán practicar sin ver explicaciones al momento.",
+      "evidence":"Quiz:33-154 ya ofrece corrección inmediata, saltos y resumen. El repaso completo con respuesta enviada fija y el simulacro con corrección al final son funciones nuevas.",
+      "work":"Mostrar aciertos, fallos, saltos, respuestas enviadas y explicaciones con acciones de repaso. Mantener estudio normal por defecto y ofrecer tiempo y corrección diferida como opciones explícitas.",
+      "accept":"Cada pregunta tiene estado de repaso; se puede volver a los saltos; las respuestas sobreviven a la navegación; se define y prueba qué ocurre al agotarse el tiempo y al continuar; estudiar sin tiempo sigue disponible.",
+      "risk":"Una nota de práctica no predice el examen de Google. Comprobar duración y longitud oficiales en una fuente actual antes de presentarlas como configuración oficial."
+    },
+    {
+      "id":"L03","title":"Guardar intentos y programar repaso espaciado","area":"Aprendizaje","priority":"P3","kind":"Oportunidad","days":[4,8],"suggested":false,"deps":["C03","C05","C06","C09","L02"],
+      "impact":"Un último resultado verdadero/falso no muestra evolución ni cuándo conviene repasar otra vez.",
+      "evidence":"utils\\__init__.py:42-64 guarda un booleano por ID. Intentos con fecha, confianza, marcadores y fechas de repaso serían datos nuevos.",
+      "work":"Añadir historial de intentos sin sobrescribir los anteriores, lista de marcados, confianza opcional y reglas simples de repaso. Conservar resultados antiguos sin inventar fechas históricas.",
+      "accept":"Las reglas producen resultados predecibles en pruebas; el usuario entiende y puede cambiar fechas; la migración conserva resultados; los gráficos distinguen muestra, cobertura y rendimiento reciente.",
+      "risk":"Más datos requieren más cuidado de copias y privacidad. Elegir archivos o SQLite por necesidades de guardado, no por moda."
+    },
+    {
+      "id":"L04","title":"Conectar la comparación de productos con la práctica","area":"Aprendizaje","priority":"P2","kind":"Oportunidad","days":[2,4],"suggested":false,"deps":["F03","D07","L01"],
+      "impact":"Los detalles de productos son más útiles si se pueden comparar unos pocos servicios y practicar sus diferencias inmediatamente.",
+      "evidence":"pages\\2_☁️_GCP_Products.py:154-232 muestra detalles, matriz y conexiones. pyvis_html, :73-133, está definido pero no se usa en la página. No existe actualmente un grafo interactivo activo.",
+      "work":"Comparar dos o tres productos y enlazar preguntas relacionadas mediante nombres canónicos. Conservar casos de uso y cuándo no usar cada servicio. Añadir grafo solo si resuelve una necesidad real.",
+      "accept":"Las comparaciones funcionan en móvil; los enlaces generan preguntas adecuadas o un aviso claro; las referencias externas se identifican sin tratarlas automáticamente como rotas.",
+      "risk":"Un grafo complejo puede añadir trabajo sin mejorar el aprendizaje. Comparaciones y enlaces a práctica son el primer paso más pequeño."
+    },
+    {
+      "id":"L05","title":"Añadir cuentas y progreso entre dispositivos","area":"Ampliaciones","priority":"P3","kind":"Oportunidad","days":[10,20],"suggested":false,"deps":["C04","C05","C06","C09","D06","D09"],
+      "impact":"Si se convierte en servicio compartido, cada usuario necesita historial privado y los editores necesitan permisos distintos.",
+      "evidence":"El código usa archivos y caché compartidos y muestra el editor como una página. No se identificó progreso separado por cuenta en los recorridos revisados. No es necesario para una aplicación local de un solo usuario.",
+      "work":"Elegir un proveedor de identidad, vincular registros al usuario autorizado, separar permisos de edición y diseñar guardado, copias, exportación, borrado y conflictos entre dispositivos. Probar los límites de acceso antes de publicar.",
+      "accept":"Dos usuarios no ven ni cambian el historial del otro; un estudiante no edita preguntas compartidas; cerrar sesión corta el acceso; se prueban restauración, exportación y borrado de la cuenta.",
+      "risk":"Añade coste recurrente. Proveedor, conservación de datos, región y permisos requieren aprobación aparte. Un selector de perfiles no basta."
+    },
+    {
+      "id":"L06","title":"Estudiar sin conexión solo si hace falta","area":"Ampliaciones","priority":"P3","kind":"Oportunidad","days":[8,15],"suggested":false,"deps":["F02","C09","D09"],
+      "impact":"Una aplicación instalable sin conexión sirve para viajes o mala cobertura, pero complica bastante el estado y las actualizaciones del contenido.",
+      "evidence":"La aplicación actual funciona con Streamlit y no tiene recorrido web sin conexión. El soporte PWA es una función propuesta, no un fallo actual.",
+      "work":"Después de F02, definir contenido que se permite descargar, versiones de caché, intentos locales, avisos de actualización y reglas de sincronización y conflictos. Sincronizar entre dispositivos solo con L05 u otra identidad aprobada.",
+      "accept":"Una sesión descargada autorizada funciona sin red; reconectar no pierde ni cuenta dos veces respuestas; se detecta contenido antiguo y se pueden borrar datos locales.",
+      "risk":"Requiere permisos de distribución y una política clara de almacenamiento y privacidad. La estimación no incluye cuentas ni la nueva interfaz."
+    }
+  ]
+  </script>
+  <script>
+    "use strict";
+    const proposals = JSON.parse(document.getElementById("plan-data").textContent);
+    const key = "pmle-implementation-decisions-bbc6431-v1";
+    const states = ["pending", "approve", "later", "decline"];
+    const labels = { pending:"Sin decidir", approve:"Aprobar", later:"Más adelante", decline:"Descartar" };
+    let decisions = Object.fromEntries(proposals.map(p => [p.id, "pending"]));
+    const status = document.getElementById("storage-status");
+    try {
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("Elecciones guardadas inválidas");
+        for (const p of proposals) if (states.includes(parsed[p.id])) decisions[p.id] = parsed[p.id];
+      }
+      status.textContent = "El borrador se queda en este dispositivo. No se envían datos a ningún sitio.";
+    } catch (error) {
+      status.textContent = "No se pudieron cargar las elecciones guardadas. Crea un borrador y descárgalo antes de cerrar.";
+    }
+    function el(tag, text, className) {
+      const node = document.createElement(tag);
+      if (text !== undefined) node.textContent = text;
+      if (className) node.className = className;
+      return node;
+    }
+    const list = document.getElementById("proposal-list");
+    for (const area of [...new Set(proposals.map(p => p.area))]) {
+      const option = el("option", area); option.value = area; document.getElementById("category").append(option);
+    }
+    for (const p of proposals) {
+      const detail = el("details", undefined, "proposal"); detail.id = p.id;
+      const summary = el("summary");
+      summary.append(el("span", p.id + " / " + p.title, "title"));
+      summary.append(el("span", p.priority + " | " + p.area + " | " + p.kind + " | " + p.days.map(n => n.toLocaleString("es-ES")).join("-") + " días" + (p.suggested ? " | Recomendado" : ""), "meta"));
+      detail.append(summary);
+      const body = el("div", undefined, "body");
+      const dl = el("dl");
+      for (const [label, text] of [
+        ["Por qué importa",p.impact],["Evidencia",p.evidence],["Cambio propuesto",p.work],
+        ["Cómo comprobarlo",p.accept],["Requiere antes",p.deps.length ? p.deps.join(", ") : "Sin dependencias"],
+        ["Riesgo o coste",p.risk]
+      ]) { dl.append(el("dt",label),el("dd",text)); }
+      body.append(dl);
+      const field = el("fieldset"); field.append(el("legend","Decisión para " + p.id));
+      const options = el("div",undefined,"decision-options");
+      for (const state of states) {
+        const label = el("label");
+        const radio = el("input"); radio.type = "radio"; radio.name = "decision-" + p.id;
+        radio.value = state; radio.checked = decisions[p.id] === state;
+        radio.addEventListener("change",() => { decisions[p.id] = state; save(); refresh(); });
+        label.append(radio,el("span",labels[state])); options.append(label);
+      }
+      field.append(options); body.append(field); detail.append(body); list.append(detail);
+    }
+    function save() {
+      try { localStorage.setItem(key,JSON.stringify(decisions)); status.textContent = "Borrador guardado en este dispositivo."; }
+      catch (error) { status.textContent = "Este navegador no pudo guardar el borrador. Descarga tus decisiones antes de cerrar."; }
+    }
+    function warnings() {
+      const result = [];
+      for (const p of proposals.filter(p => decisions[p.id] === "approve")) {
+        const missing = p.deps.filter(id => decisions[id] !== "approve");
+        if (missing.length) result.push(p.id + " requiere aprobar antes " + missing.join(", ") + ".");
+      }
+      if (decisions.F01 === "approve" && decisions.F02 === "approve") result.push("F01 y F02 son alternativas de interfaz. Elige una o acuerda expresamente una migración gradual antes de implementar.");
+      return result;
+    }
+    function summaryText() {
+      const approved = proposals.filter(p => decisions[p.id] === "approve");
+      return ["Decisiones de implementación de PMLE Quiz","Revisión: bbc6431 / 2026-10-01","Solo es un borrador. Implementar requiere una petición explícita.","",
+        ...proposals.map(p => p.id + " [" + labels[decisions[p.id]] + "] " + p.title),
+        "","Estimación de lo aprobado: " + approved.reduce((n,p) => n+p.days[0],0).toLocaleString("es-ES") + "-" + approved.reduce((n,p) => n+p.days[1],0).toLocaleString("es-ES") + " días de trabajo de una persona (orientación, sin descontar tareas compartidas).",
+        "",...warnings()].join("\n");
+    }
+    function refresh() {
+      const search = document.getElementById("search").value.trim().toLowerCase();
+      const area = document.getElementById("category").value;
+      const decision = document.getElementById("decision-filter").value;
+      let visible = 0;
+      for (const p of proposals) {
+        const node = document.getElementById(p.id);
+        node.hidden = Boolean((area && p.area !== area) || (decision && decisions[p.id] !== decision) || (search && !JSON.stringify(p).toLowerCase().includes(search)));
+        if (!node.hidden) visible++;
+        for (const radio of node.querySelectorAll("input")) radio.checked = decisions[p.id] === radio.value;
+      }
+      const approved = proposals.filter(p => decisions[p.id] === "approve");
+      document.getElementById("total-count").textContent = proposals.length;
+      document.getElementById("approved-count").textContent = approved.length;
+      document.getElementById("effort-total").textContent = approved.length ? approved.reduce((n,p)=>n+p.days[0],0).toLocaleString("es-ES") + "-" + approved.reduce((n,p)=>n+p.days[1],0).toLocaleString("es-ES") + " días" : "0 días";
+      document.getElementById("visible-count").textContent = visible + " de " + proposals.length + " propuestas visibles";
+      document.getElementById("empty").hidden = visible !== 0;
+      const warning = document.getElementById("dependencies"), messages = warnings();
+      warning.hidden = messages.length === 0; warning.textContent = messages.join(" ");
+      document.getElementById("decision-summary").value = summaryText();
+    }
+    for (const id of ["search","category","decision-filter"]) document.getElementById(id).addEventListener("input",refresh);
+    document.getElementById("recommended").addEventListener("click",() => {
+      if (!confirm("¿Sustituir tus elecciones por el alcance recomendado? Las demás propuestas volverán a Sin decidir. Esto no inicia la implementación.")) return;
+      for (const p of proposals) decisions[p.id] = p.suggested ? "approve" : "pending";
+      save(); refresh();
+    });
+    document.getElementById("reset").addEventListener("click",() => {
+      if (!confirm("¿Volver a dejar todas las elecciones del borrador Sin decidir?")) return;
+      for (const p of proposals) decisions[p.id] = "pending";
+      save(); refresh();
+    });
+    for (const [id,open] of [["expand",true],["collapse",false]]) document.getElementById(id).addEventListener("click",() => {
+      for (const node of list.querySelectorAll("details")) if (!node.hidden) node.open = open;
+    });
+    document.getElementById("show-summary").addEventListener("click",() => {
+      document.getElementById("summary-panel").hidden = false; document.getElementById("decision-summary").focus();
+    });
+    document.getElementById("download").addEventListener("click",() => {
+      try {
+        const payload = { project:"gcp-pmle-quiz-matt", locale:"es", auditCommit:"bbc6431", auditDate:"2026-10-01", exportedAt:new Date().toISOString(), draftOnly:true, warnings:warnings(), proposals:proposals.map(p=>({ id:p.id,title:p.title,decision:decisions[p.id],decisionLabel:labels[decisions[p.id]],dependencies:p.deps,estimateDays:p.days })) };
+        const url = URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}));
+        const link = el("a"); link.href=url; link.download="pmle-decisiones-implementacion.json"; document.body.append(link); link.click(); link.remove();
+        setTimeout(()=>URL.revokeObjectURL(url),1000);
+        status.textContent = "Descarga solicitada. Comprueba las descargas del navegador; no se ha iniciado ningún cambio.";
+      } catch (error) { status.textContent = "La descarga falló. Pulsa Ver resumen y copia tus elecciones."; }
+    });
+    refresh();
+  </script>
+</body>
+</html>

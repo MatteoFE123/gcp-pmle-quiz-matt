@@ -1,3 +1,18 @@
 
 [server]
 enableStaticServing = true
+
+[theme]
+font = "sans serif"
+
+[theme.light]
+primaryColor = "#27856b"
+backgroundColor = "#f6f8f7"
+secondaryBackgroundColor = "#e9eeeb"
+textColor = "#1c2924"
+
+[theme.dark]
+primaryColor = "#27856b"
+backgroundColor = "#141a18"
+secondaryBackgroundColor = "#202b26"
+textColor = "#edf3ef"

@@ -222,3 +222,11 @@ data/bak
 notebooks/
 .venv_torch/
 .vscode/
+data/progress.json
+data/progress.json.bak*
+data/quizzes.jsonl.bak*
+data/progress.json.lock
+data/quizzes.jsonl.lock
+data/.progress.json.*.pending
+data/.quizzes.jsonl.*.pending
+tests/.storage-fixtures-*/

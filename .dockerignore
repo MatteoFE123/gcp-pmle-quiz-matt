@@ -8,3 +8,7 @@ __pycache__
 .vscode
 .idea
 _docs
+.git
+cache
+.streamlit/secrets.toml
+tests
