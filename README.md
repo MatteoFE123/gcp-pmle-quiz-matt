@@ -1,6 +1,10 @@
 # PMLE Study
 
-Aplicación local de Streamlit para preparar Google Cloud Professional Machine Learning Engineer. La interfaz está en español; las preguntas, explicaciones y fichas conservan su idioma original.
+Aplicación para preparar Google Cloud Professional Machine Learning Engineer, ejecutada completamente en el navegador. La interfaz está en español; las preguntas, explicaciones y fichas conservan su idioma original.
+
+**Abrir la app:** https://matteofe123.github.io/gcp-pmle-quiz-matt/
+
+GitHub Pages sirve HTML, CSS, JavaScript y el banco de preguntas. No necesita Python, cuentas ni un servidor de Streamlit. La versión local de Streamlit se conserva como alternativa y usa sus propios archivos de datos.
 
 ## Qué puedes hacer
 
@@ -13,7 +17,46 @@ Aplicación local de Streamlit para preparar Google Cloud Professional Machine L
 
 El banco contiene 841 preguntas y 104 fichas de producto. La precisión muestra el **último resultado guardado por pregunta**, no todos los intentos ni una predicción del examen oficial.
 
-## Instalación local
+## Progreso en el navegador
+
+- El progreso, las selecciones, la ronda pendiente y las ediciones se guardan en **IndexedDB de este navegador y este sitio**. No se envían a GitHub ni se sincronizan entre dispositivos.
+- Las respuestas enviadas quedan bloqueadas. Saltar no cuenta como fallo. El historial cambia al guardar los resultados, no al seleccionar una opción.
+- Los guardados son transacciones con control de revisión: una pestaña antigua no puede sobrescribir los cambios de otra. Si aparece un conflicto, pulsa **Recargar datos**.
+- En **Inicio > Copias, importación y reinicio**, descarga una copia completa o solo el progreso. La copia completa incluye también las ediciones y la ronda pendiente.
+- Puedes importar `data/progress.json` o una descarga de progreso de Streamlit. No se importa automáticamente ni se publica tu archivo local. Guarda o descarta primero cualquier ronda pendiente.
+- Importar reemplaza los datos indicados tras confirmación. Una copia completa restaura también la ronda y las ediciones; importar solo progreso no modifica las preguntas.
+- Cada guardado conserva una copia anterior, no un historial ilimitado. Si los datos están dañados, la app no los reemplaza por un historial vacío: permite descargarlos y recuperar la copia anterior si es válida.
+- **Borrar los datos del sitio o usar navegación privada puede eliminar el progreso.** Descarga copias regularmente. El almacenamiento debe estar permitido; no hay un modo temporal que aparente guardar sin hacerlo.
+- Las ediciones afectan solo a futuras rondas de este navegador. No modifican el repositorio ni las copias de otros estudiantes. El editor permite descargar el banco editado con sus metadatos.
+
+Se necesita conexión para cargar la app y el banco. No se promete funcionamiento sin conexión. Las imágenes del banco se publican con la app; se filtra el HTML del contenido y no se cargan imágenes externas automáticamente.
+
+## Desarrollo y publicación web
+
+Necesitas Node.js 22.12 o posterior y npm:
+
+```powershell
+npm ci
+npm run build
+npm run preview
+```
+
+Abre la dirección local que muestra el comando. `npm run dev` permite editar la interfaz con recarga automática. Los datos se leen de `data` y las imágenes de `static`; los cambios personales siguen en el navegador. No abras `index.html` con `file://`.
+
+La compilación genera `dist`. Solo copia los dos catálogos (`quizzes.jsonl` y `gcp_products.jsonl`) y `static/images`; nunca `progress.json`, copias privadas, cachés ni secretos. Las dependencias se incluyen en el paquete, sin depender de un CDN en tiempo de ejecución.
+
+El workflow **Browser app and Pages** compila, comprueba la lógica y ejecuta recorridos reales en Chromium antes de publicar `dist`. En **Settings > Pages > Build and deployment**, la fuente debe ser **GitHub Actions**, no la publicación de la raíz mediante Jekyll. La navegación usa fragmentos como `#Quiz_Mode`, por lo que recargar una sección funciona dentro del subdirectorio del repositorio.
+
+```powershell
+npm test
+npm run build
+npx playwright install chromium
+npm run test:browser
+```
+
+Las pruebas web usan navegadores aislados y datos ficticios, además de validar el banco real sin modificarlo. Cubren respuestas únicas y múltiples, recuperación, conflictos, edición local, importación, exportación y móvil.
+
+## Streamlit local (alternativa)
 
 Necesitas Python 3.10 o posterior y [uv](https://docs.astral.sh/uv/getting-started/installation/). Las comprobaciones de CI incluyen Python 3.10 y 3.13.
 
@@ -30,7 +73,7 @@ En Linux o macOS, utiliza `cd gcp-pmle-quiz-matt` en lugar de `Set-Location`. Lo
 
 El comando soportado es `streamlit run`; no se instala un comando independiente llamado `quiz`. Las versiones de las dependencias están registradas en `uv.lock`.
 
-## Guardado y recuperación
+## Guardado y recuperación en Streamlit
 
 Esta versión está diseñada para **un estudiante local**, no para publicar un servicio multiusuario. Distintos navegadores comparten historial y ronda. Si dos pestañas intentan modificar una ronda desde versiones distintas, se rechaza el cambio antiguo en vez de sobrescribirlo.
 
@@ -105,4 +148,4 @@ docker compose config --quiet
 
 Las pruebas usan datos ficticios y directorios aislados. Comprueban validación, conflictos, copias, recuperación, guardado, navegación, filtros, edición, exportaciones y orden de los gráficos. No leen ni modifican el progreso real.
 
-El plan de mejoras original está en [`_docs/implementation-plan.html`](_docs/implementation-plan.html). Es la fotografía de la auditoría previa, no un indicador automático de lo ya implementado. Se ha elegido renovar Streamlit y corregir los recorridos básicos; cuentas, trabajo sin conexión, repetición espaciada y revisión experta del banco quedan fuera de esta entrega.
+El plan de mejoras original está en [`_docs/implementation-plan.html`](_docs/implementation-plan.html). Es la fotografía de la auditoría previa, no un indicador automático de lo ya implementado. Tras renovar Streamlit, se añadió la versión de navegador para GitHub Pages. Cuentas, sincronización entre dispositivos, trabajo sin conexión, repetición espaciada y revisión experta del banco quedan fuera de esta entrega.

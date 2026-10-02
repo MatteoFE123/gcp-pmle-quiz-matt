@@ -230,3 +230,6 @@ data/quizzes.jsonl.lock
 data/.progress.json.*.pending
 data/.quizzes.jsonl.*.pending
 tests/.storage-fixtures-*/
+node_modules/
+test-results/
+playwright-report/

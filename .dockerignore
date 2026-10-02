@@ -12,3 +12,7 @@ _docs
 cache
 .streamlit/secrets.toml
 tests
+node_modules
+dist
+test-results
+playwright-report

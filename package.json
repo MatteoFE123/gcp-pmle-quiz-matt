@@ -1,0 +1,23 @@
+{
+  "name": "pmle-study-browser",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build && node tools/copy-web-data.mjs",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "node --test tests/web/core.test.mjs",
+    "test:browser": "playwright test"
+  },
+  "dependencies": {
+    "dompurify": "3.4.16",
+    "marked": "18.0.14"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "vite": "8.3.2"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

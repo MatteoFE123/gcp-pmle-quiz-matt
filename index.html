@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="es" data-theme="dark">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Practica para Google Cloud Professional Machine Learning Engineer. Preguntas, repaso y progreso privado en tu navegador.">
+    <meta name="theme-color" content="#141a18">
+    <title>PMLE Study</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Saltar al contenido</a>
+    <header>
+      <a class="brand" href="#Inicio">PMLE <span>Study</span></a>
+      <nav aria-label="Navegación principal">
+        <a href="#Inicio">Inicio</a>
+        <a href="#Quiz_Mode">Práctica</a>
+        <a href="#Progress">Progreso</a>
+        <a href="#GCP_Products">Productos</a>
+        <a href="#Export_for_LM">Exportar</a>
+        <a href="#Edit_Questions">Editar preguntas</a>
+      </nav>
+      <button id="theme" type="button" aria-label="Cambiar tema">Tema claro</button>
+    </header>
+    <div id="notice" role="status" aria-live="polite"></div>
+    <main id="main" tabindex="-1">
+      <h1>Tu próxima sesión de estudio</h1>
+      <p role="status">Cargando preguntas y progreso del navegador…</p>
+      <div class="skeleton" aria-hidden="true"></div>
+    </main>
+    <footer>Preparación personal para Google Cloud PMLE. No es un producto oficial de Google.<br>Tu progreso se guarda en este navegador, no en GitHub.</footer>
+    <noscript>Activa JavaScript para cargar las preguntas y practicar. Esta aplicación se ejecuta en tu navegador.</noscript>
+    <script type="module" src="./web/app.js"></script>
+  </body>
+</html>
