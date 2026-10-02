@@ -1,24 +1,26 @@
+import { LANGUAGES, LocalizedError, t } from "./i18n.js";
+
 export const STATUSES = ["Pendientes", "Falladas", "Acertadas"];
 export const TOPICS = { "Temas GCP": "gcp_topics", Productos: "gcp_products", "Machine learning": "ml_topics" };
 const own = (value, key) => Object.hasOwn(value, key);
 const object = value => value !== null && typeof value === "object" && !Array.isArray(value);
 const positiveId = value => /^[1-9]\d*$/.test(value) && Number.isSafeInteger(Number(value));
 
-export function requireValid(condition, message) {
-  if (!condition) throw new Error(message);
+export function requireValid(condition, message, values) {
+  if (!condition) throw new LocalizedError(message, values);
 }
 
 export function validateQuestion(value, legacy = false) {
   requireValid(object(value), "La pregunta no es un objeto válido.");
   const q = structuredClone(value);
   requireValid(Number.isSafeInteger(q.id) && q.id > 0, "Identificador de pregunta inválido.");
-  requireValid(["single_choice", "multiple_choice"].includes(q.mode), `Modo inválido en la pregunta ${q.id}.`);
-  requireValid(typeof q.question === "string" && q.question.trim(), `Enunciado vacío en la pregunta ${q.id}.`);
+  requireValid(["single_choice", "multiple_choice"].includes(q.mode), "Modo inválido en la pregunta {id}.", { id: q.id });
+  requireValid(typeof q.question === "string" && q.question.trim(), "Enunciado vacío en la pregunta {id}.", { id: q.id });
   for (const field of ["options", "gcp_topics", "gcp_products", "ml_topics"]) {
     if (field !== "options" && q[field] === undefined) q[field] = [];
-    requireValid(Array.isArray(q[field]) && q[field].every(s => typeof s === "string" && s.trim()), `Lista ${field} inválida en la pregunta ${q.id}.`);
+    requireValid(Array.isArray(q[field]) && q[field].every(s => typeof s === "string" && s.trim()), "Lista {field} inválida en la pregunta {id}.", { field, id: q.id });
   }
-  requireValid(q.options.length > 0, `La pregunta ${q.id} no tiene opciones.`);
+  requireValid(q.options.length > 0, "La pregunta {id} no tiene opciones.", { id: q.id });
   requireValid(q.explanation == null || typeof q.explanation === "string", "Explicación inválida.");
   if (legacy && q.mode === "multiple_choice" && Number.isInteger(q.answer)) q.answer = [q.answer];
   requireValid(q.mode === "single_choice" ? Number.isInteger(q.answer) : Array.isArray(q.answer), "Formato de respuesta inválido.");
@@ -32,7 +34,7 @@ function parseLines(text) {
   return text.split(/\r?\n/).flatMap((line, index) => {
     if (!line.trim()) return [];
     try { return [JSON.parse(line)]; }
-    catch { throw new Error(`JSON inválido en la línea ${index + 1}.`); }
+    catch { throw new LocalizedError("JSON inválido en la línea {line}.", { line: index + 1 }); }
   });
 }
 
@@ -43,7 +45,7 @@ export function parseQuestions(text) {
       console.warn(`Respuesta múltiple heredada normalizada en memoria: ${value.id}.`);
     }
     const q = validateQuestion(value, true);
-    requireValid(!ids.has(q.id), `Identificador duplicado: ${q.id}.`);
+    requireValid(!ids.has(q.id), "Identificador duplicado: {id}.", { id: q.id });
     ids.add(q.id);
     return q;
   });
@@ -59,11 +61,11 @@ export function parseProducts(text) {
     names.add(row.product_name);
     for (const field of ["ui", "connected_to", "use_cases", "not_used_when"]) {
       row[field] ??= [];
-      requireValid(Array.isArray(row[field]) && row[field].every(s => typeof s === "string"), `Campo ${field} inválido.`);
+      requireValid(Array.isArray(row[field]) && row[field].every(s => typeof s === "string"), "Campo {field} inválido.", { field });
     }
     for (const field of ["entity_type", "short_description"]) {
       row[field] ??= "";
-      requireValid(typeof row[field] === "string", `Campo ${field} inválido.`);
+      requireValid(typeof row[field] === "string", "Campo {field} inválido.", { field });
     }
     return row;
   });
@@ -93,7 +95,7 @@ export function validateProgress(progress) {
 }
 
 export function emptyState() {
-  return { version: 1, revision: 0, progress: {}, round: null, edits: {}, theme: "dark" };
+  return { version: 1, revision: 0, progress: {}, round: null, edits: {}, theme: "dark", language: "es" };
 }
 
 export function validateState(value) {
@@ -101,6 +103,8 @@ export function validateState(value) {
   requireValid(object(s) && s.version === 1, "Formato de copia no compatible. No se han sobrescrito tus datos.");
   requireValid(Number.isSafeInteger(s.revision) && s.revision >= 0, "Revisión de datos inválida.");
   requireValid(["dark", "light"].includes(s.theme), "Tema inválido.");
+  if (!own(s, "language")) s.language = "es";
+  requireValid(typeof s.language === "string" && own(LANGUAGES, s.language), "Idioma no compatible.");
   validateProgress(s.progress);
   requireValid(object(s.edits), "Ediciones inválidas.");
   for (const [id, q] of Object.entries(s.edits)) {
@@ -171,7 +175,7 @@ export function resetProgress(s) {
 export function importData(text) {
   let data;
   try { data = JSON.parse(text); }
-  catch { throw new Error("El archivo no contiene JSON válido."); }
+  catch { throw new LocalizedError("El archivo no contiene JSON válido."); }
   if (data?.app === "pmle-study") return { kind: "backup", state: validateState(data.state) };
   return { kind: "progress", progress: validateProgress(data) };
 }
@@ -184,6 +188,7 @@ export function applyImport(s, data) {
     s.edits = restored.edits;
     s.round = restored.round;
     s.theme = restored.theme;
+    s.language = restored.language;
   } else s.progress = structuredClone(validateProgress(data.progress));
 }
 
@@ -224,10 +229,10 @@ export function productConnections(rows) {
 export const optionText = (q, index) => q.options[index].replace(new RegExp(`^\\s*${String.fromCharCode(65 + index)}[.)]\\s+`), "");
 export const answerLabel = (q, index) => `${String.fromCharCode(65 + index)}. ${optionText(q, index)}`;
 export function exportMarkdown(questions, title, explanations = true) {
-  const lines = [`# ${title}`, "", "Material de repaso personal. El contenido conserva su idioma original.", ""];
+  const lines = [`# ${title}`, "", t("Material de repaso personal. El contenido conserva su idioma original."), ""];
   for (const q of questions) {
-    lines.push(`## Pregunta #${q.id}`, "", q.question, "", "### Opciones", ...q.options.map((_, i) => answerLabel(q, i)), "", "### Respuesta correcta", ...correctAnswers(q).map(i => answerLabel(q, i)));
-    if (explanations && q.explanation) lines.push("", "### Explicación", "", q.explanation);
+    lines.push(`## ${t("Pregunta #{id}", { id: q.id })}`, "", q.question, "", `### ${t("Opciones")}`, ...q.options.map((_, i) => answerLabel(q, i)), "", `### ${t("Respuesta correcta")}`, ...correctAnswers(q).map(i => answerLabel(q, i)));
+    if (explanations && q.explanation) lines.push("", `### ${t("Explicación")}`, "", q.explanation);
     lines.push("", "---", "");
   }
   return lines.join("\n");

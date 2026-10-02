@@ -37,6 +37,9 @@ nav { display: flex; gap: 20px; flex: 1; align-items: center; }
 nav a { color: var(--muted); white-space: nowrap; font-size: .9rem; text-decoration: none; padding: 6px 0; }
 nav a[aria-current="page"] { color: var(--text); box-shadow: 0 2px var(--link); }
 #theme { font-size: .8rem; padding: .4rem .6rem; white-space: nowrap; }
+.language-control { display: flex; align-items: center; gap: 8px; font-size: .8rem; }
+#language { width: auto; font-size: .85rem; padding: .4rem .6rem; }
+#language-help { margin: 10px auto 0; max-width: 75ch; }
 main { max-width: 1060px; margin: auto; padding: 48px 28px 64px; min-height: 70dvh; }
 h1 { font-size: clamp(1.7rem, 4vw, 2.25rem); line-height: 1.2; letter-spacing: -.035em; margin: 0 0 12px; }
 h2 { font-size: 1.35rem; letter-spacing: -.02em; line-height: 1.35; margin: 32px 0 16px; }
@@ -104,10 +107,12 @@ noscript { display: block; padding: 24px; }
 @media (max-width: 1100px) {
   header { gap: 16px; flex-wrap: wrap; }
   nav { order: 3; flex-basis: 100%; overflow-x: auto; padding-bottom: 6px; }
-  #theme { margin-left: auto; }
+  .language-control { margin-left: auto; }
 }
 @media (max-width: 767px) {
   header { padding: 12px 16px; }
+  .language-control { margin-left: 0; }
+  .language-control > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
   nav { gap: 24px; }
   main { padding: 30px 18px 48px; }
   #notice { padding: 0 18px; }

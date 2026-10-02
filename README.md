@@ -1,6 +1,6 @@
 # PMLE Study
 
-Aplicación para preparar Google Cloud Professional Machine Learning Engineer, ejecutada completamente en el navegador. La interfaz está en español; las preguntas, explicaciones y fichas conservan su idioma original.
+Aplicación para preparar Google Cloud Professional Machine Learning Engineer, ejecutada completamente en el navegador. La interfaz web se puede cambiar entre **español e inglés** desde el selector **Idioma / Language** de la cabecera. Las preguntas, explicaciones y fichas conservan su idioma original; no se traducen automáticamente.
 
 **Abrir la app:** https://matteofe123.github.io/gcp-pmle-quiz-matt/
 
@@ -20,6 +20,7 @@ El banco contiene 841 preguntas y 104 fichas de producto. La precisión muestra 
 ## Progreso en el navegador
 
 - El progreso, las selecciones, la ronda pendiente y las ediciones se guardan en **IndexedDB de este navegador y este sitio**. No se envían a GitHub ni se sincronizan entre dispositivos.
+- El idioma elegido también se guarda en el navegador y en las copias completas. Cambiarlo no reinicia la ronda ni borra filtros o borradores de edición. Las copias antiguas sin idioma siguen siendo válidas y usan español. La versión local de Streamlit conserva su interfaz en español.
 - Las respuestas enviadas quedan bloqueadas. Saltar no cuenta como fallo. El historial cambia al guardar los resultados, no al seleccionar una opción.
 - Los guardados son transacciones con control de revisión: una pestaña antigua no puede sobrescribir los cambios de otra. Si aparece un conflicto, pulsa **Recargar datos**.
 - En **Inicio > Copias, importación y reinicio**, descarga una copia completa o solo el progreso. La copia completa incluye también las ediciones y la ronda pendiente.

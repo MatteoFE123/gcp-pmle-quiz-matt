@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { english, setLanguage, t } from "../../web/i18n.js";
 import {
   parseQuestions, parseProducts, validateQuestion, validateState, emptyState, eligibleQuestions,
   startRound, selectAnswer, submitAnswer, finishRound, resetProgress, importData, applyImport,
@@ -153,4 +154,49 @@ test("edits preserve metadata and exports match selected scope", () => {
 test("product connection counts deduplicate and handle empty catalogs", () => {
   assert.deepEqual(productConnections([]), []);
   assert.deepEqual(productConnections([{ connected_to: [" GCP  API ", "GCP API"] }, { connected_to: [] }]), [["GCP API", 1]]);
+});
+
+test("language preference is validated, migrates old saves and round-trips in backups", () => {
+  const legacy = emptyState();
+  delete legacy.language;
+  assert.equal(validateState(legacy).language, "es");
+  assert.equal(Object.hasOwn(legacy, "language"), false);
+  for (const language of [null, "", "fr", 42, "__proto__", ["en"]]) {
+    assert.throws(() => validateState({ ...emptyState(), language }), /Idioma/);
+  }
+  const s = { ...emptyState(), language: "en" };
+  const target = emptyState();
+  applyImport(target, importData(JSON.stringify({ app: "pmle-study", state: s })));
+  assert.equal(target.language, "en");
+  applyImport(target, importData('{"10001":true}'));
+  assert.equal(target.language, "en");
+});
+
+test("every explicit translation key has an English entry", async () => {
+  for (const file of ["app.js", "core.js", "storage.js"]) {
+    const source = await readFile(`web/${file}`, "utf8");
+    for (const match of source.matchAll(/\bt\("([^"]+)"/g)) {
+      assert.ok(Object.hasOwn(english, match[1]), `${file}: ${match[1]}`);
+    }
+  }
+});
+
+test("English translations preserve placeholders, exports and original content", () => {
+  const placeholders = text => [...text.matchAll(/\{(\w+)\}/g)].map(m => m[1]).sort();
+  for (const [key, value] of Object.entries(english)) {
+    assert.ok(value.trim(), key);
+    assert.deepEqual(placeholders(value), placeholders(key), key);
+  }
+  try {
+    setLanguage("en");
+    assert.equal(t("Pregunta {position} de {total}", { position: 2, total: 10 }), "Question 2 of 10");
+    assert.throws(() => submitAnswer(emptyState()), /There is no active question/);
+    assert.throws(() => parseQuestions("bad"), /Invalid JSON on line 1/);
+    const text = exportMarkdown([single], "Correct questions");
+    assert.match(text, /### Correct answer/);
+    assert.match(text, /### Explanation/);
+    assert.match(text, /Ejemplo único/);
+    assert.match(text, /Explicación/);
+    assert.equal(single.question, "Ejemplo único");
+  } finally { setLanguage("es"); }
 });

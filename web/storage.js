@@ -1,19 +1,20 @@
 import { emptyState, validateState } from "./core.js";
+import { LocalizedError } from "./i18n.js";
 
 export const DATABASE = `pmle-study:${new URL(".", document.baseURI).pathname}`;
-const conflict = () => new Error("Otra pestaña ha cambiado tus datos. Pulsa «Recargar datos» antes de continuar.");
+const conflict = () => new LocalizedError("Otra pestaña ha cambiado tus datos. Pulsa «Recargar datos» antes de continuar.");
 
 export function openStorage() {
   return new Promise((resolve, reject) => {
     let request;
     try { request = indexedDB.open(DATABASE, 1); }
     catch {
-      reject(new Error("No se puede abrir el almacenamiento del navegador. Permite los datos de este sitio y vuelve a cargar."));
+      reject(new LocalizedError("No se puede abrir el almacenamiento del navegador. Permite los datos de este sitio y vuelve a cargar."));
       return;
     }
     request.onupgradeneeded = () => request.result.createObjectStore("state");
-    request.onerror = () => reject(new Error("No se puede abrir el almacenamiento del navegador. Permite los datos de este sitio y vuelve a cargar."));
-    request.onblocked = () => reject(new Error("Cierra las otras pestañas de la aplicación para actualizar su almacenamiento."));
+    request.onerror = () => reject(new LocalizedError("No se puede abrir el almacenamiento del navegador. Permite los datos de este sitio y vuelve a cargar."));
+    request.onblocked = () => reject(new LocalizedError("Cierra las otras pestañas de la aplicación para actualizar su almacenamiento."));
     request.onsuccess = () => {
       const db = request.result;
       db.onversionchange = () => db.close();
@@ -29,7 +30,7 @@ export function readStorage(db) {
     const current = store.get("current");
     const backup = store.get("backup");
     tx.oncomplete = () => resolve({ current: current.result === undefined ? emptyState() : current.result, backup: backup.result });
-    tx.onabort = tx.onerror = () => reject(new Error("No se pudieron leer tus datos. No se ha borrado nada."));
+    tx.onabort = tx.onerror = () => reject(new LocalizedError("No se pudieron leer tus datos. No se ha borrado nada."));
   });
 }
 
@@ -51,13 +52,13 @@ export function writeStorage(db, revision, mutate) {
         store.put(next, "current");
       } catch (error) {
         failure = error instanceof DOMException
-          ? new Error("No se pudo guardar. Comprueba el espacio y los permisos del navegador. Tu último guardado sigue intacto.")
+          ? new LocalizedError("No se pudo guardar. Comprueba el espacio y los permisos del navegador. Tu último guardado sigue intacto.")
           : error;
         tx.abort();
       }
     };
     tx.oncomplete = () => resolve(next);
-    tx.onabort = tx.onerror = () => reject(failure ?? new Error("No se pudo guardar. Comprueba el espacio y los permisos del navegador. Tu último guardado sigue intacto."));
+    tx.onabort = tx.onerror = () => reject(failure ?? new LocalizedError("No se pudo guardar. Comprueba el espacio y los permisos del navegador. Tu último guardado sigue intacto."));
   });
 }
 
@@ -80,6 +81,6 @@ export function recoverStorage(db, broken, backup) {
       store.put(restored, "current");
     };
     tx.oncomplete = () => resolve(restored);
-    tx.onabort = tx.onerror = () => reject(failure ?? new Error("No se pudo recuperar la copia. Los datos originales se conservan."));
+    tx.onabort = tx.onerror = () => reject(failure ?? new LocalizedError("No se pudo recuperar la copia. Los datos originales se conservan."));
   });
 }

@@ -19,6 +19,12 @@
         <a href="#Export_for_LM">Exportar</a>
         <a href="#Edit_Questions">Editar preguntas</a>
       </nav>
+      <label class="language-control"><span id="language-label">Idioma</span>
+        <select id="language" aria-labelledby="language-label" aria-describedby="language-help" disabled>
+          <option value="es" lang="es">Español</option>
+          <option value="en" lang="en">English</option>
+        </select>
+      </label>
       <button id="theme" type="button" aria-label="Cambiar tema">Tema claro</button>
     </header>
     <div id="notice" role="status" aria-live="polite"></div>
@@ -27,7 +33,7 @@
       <p role="status">Cargando preguntas y progreso del navegador…</p>
       <div class="skeleton" aria-hidden="true"></div>
     </main>
-    <footer>Preparación personal para Google Cloud PMLE. No es un producto oficial de Google.<br>Tu progreso se guarda en este navegador, no en GitHub.</footer>
+    <footer><span id="footer-disclaimer">Preparación personal para Google Cloud PMLE. No es un producto oficial de Google.</span><br><span id="footer-storage">Tu progreso se guarda en este navegador, no en GitHub.</span><p id="language-help">El idioma cambia la interfaz. Las preguntas, explicaciones y fichas conservan su texto original.</p></footer>
     <noscript>Activa JavaScript para cargar las preguntas y practicar. Esta aplicación se ejecuta en tu navegador.</noscript>
     <script type="module" src="./web/app.js"></script>
   </body>

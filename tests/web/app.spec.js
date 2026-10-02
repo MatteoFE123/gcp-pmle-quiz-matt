@@ -241,3 +241,135 @@ test("dark/light themes, all destinations and 320px layout", async ({ page }) =>
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
 });
+
+test("language switch persists and preserves filters, selections, review and content", async ({ page }) => {
+  await page.goto("./");
+  await page.getByRole("combobox", { name: "Idioma", exact: true }).selectOption("en");
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  await expect(page.getByRole("heading", { name: "Your next study session" })).toBeVisible();
+  await page.getByRole("link", { name: "Practice", exact: true }).click();
+  await page.getByLabel("GCP topics (optional)").selectOption("Datos");
+  await expect(page.getByText("1 question available. This round will contain 1.")).toBeVisible();
+  await page.getByRole("combobox", { name: "Language", exact: true }).selectOption("es");
+  await expect(page.getByLabel("Temas GCP (opcional)")).toHaveValues(["Datos"]);
+  await page.getByRole("button", { name: "Empezar ronda", exact: true }).click();
+  await page.getByRole("radio", { name: "B. Dos" }).check();
+  await page.getByRole("combobox", { name: "Idioma", exact: true }).selectOption("en");
+  await expect(page.getByRole("heading", { name: "Question 1 of 1", exact: true })).toBeVisible();
+  await expect(page.getByRole("radio", { name: "B. Dos" })).toBeChecked();
+  await expect(page.getByText("Pregunta única de prueba", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Check answer" }).click();
+  await expect(page.getByText("Correct answer.", { exact: true })).toBeVisible();
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  await expect(page.getByRole("radio", { name: "B. Dos" })).toBeChecked();
+  await expect(page.getByRole("radio", { name: "B. Dos" })).toBeDisabled();
+  await page.getByRole("button", { name: "View summary" }).click();
+  await page.getByText("1. Correct · Question #10001", { exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Your selection" })).toBeVisible();
+  await page.getByRole("combobox", { name: "Language", exact: true }).selectOption("es");
+  await expect(page.getByRole("heading", { name: "Tu selección" })).toBeVisible();
+  expect((await readState(page)).round.results).toEqual({ 0: true });
+});
+
+test("English routes, validation errors, confirmations and Markdown exports", async ({ page }) => {
+  await page.goto("./");
+  await page.getByRole("combobox", { name: "Idioma", exact: true }).selectOption("en");
+  await page.getByRole("link", { name: "Practice", exact: true }).click();
+  await page.getByLabel("GCP topics (optional)").selectOption("Datos");
+  await page.getByRole("button", { name: "Start round", exact: true }).click();
+  await page.getByRole("button", { name: "Check answer" }).click();
+  await expect(page.getByRole("alert")).toContainText("Select at least one answer before submitting.");
+  await page.getByRole("button", { name: "View summary" }).click();
+  let confirmation;
+  page.once("dialog", async dialog => {
+    confirmation = dialog.message();
+    await dialog.accept();
+  });
+  await page.getByRole("button", { name: "Discard round", exact: true }).click();
+  expect(confirmation).toBe("Discard this round without saving its results?");
+  await expect(page.getByText("Round discarded. History has not changed.")).toBeVisible();
+  for (const [name, title] of [["Progress", "Progress"], ["Products", "Google Cloud products"], ["Export", "Export for review"], ["Edit questions", "Edit questions"]]) {
+    await page.getByRole("link", { name, exact: true }).click();
+    await expect(page.getByRole("heading", { name: title, exact: true })).toBeVisible();
+  }
+  await page.getByRole("link", { name: "Products", exact: true }).click();
+  await expect(page.getByPlaceholder("Name or description")).toBeVisible();
+  await page.getByRole("combobox", { name: "View", exact: true }).selectOption("Conexiones");
+  await expect(page.getByRole("heading", { name: "Most shared connections" })).toBeVisible();
+  await page.getByRole("link", { name: "Export", exact: true }).click();
+  await page.getByRole("combobox", { name: "Content", exact: true }).selectOption("Pendientes");
+  await expect(page.getByRole("heading", { name: "2 questions in the file" })).toBeVisible();
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Download Markdown" }).click();
+  const stream = await (await download).createReadStream();
+  let content = "";
+  for await (const part of stream) content += part;
+  expect(content).toContain("# Unanswered questions");
+  expect(content).toContain("### Correct answer");
+  expect(content).toContain("Pregunta única de prueba");
+  expect(content).not.toContain("### Respuesta correcta");
+  await page.setViewportSize({ width: 320, height: 740 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await expect(page.getByRole("combobox", { name: "Language", exact: true })).toBeVisible();
+});
+
+test("language switch preserves unsaved editor drafts and failed preference writes", async ({ page }) => {
+  await page.addInitScript(() => {
+    const original = IDBObjectStore.prototype.put;
+    IDBObjectStore.prototype.put = function (value, key) {
+      if (window.failWrites && key === "current") throw new DOMException("Storage full", "QuotaExceededError");
+      return original.call(this, value, key);
+    };
+  });
+
+  await page.goto("./");
+  await page.getByRole("link", { name: "Editar preguntas", exact: true }).click();
+  await page.getByRole("button", { name: "Editar esta pregunta" }).click();
+  await page.getByRole("radio", { name: "A. Uno" }).check();
+  await page.getByRole("textbox", { name: "Explicación", exact: true }).fill("Borrador sin guardar");
+  await page.getByRole("combobox", { name: "Idioma", exact: true }).selectOption("en");
+  await expect(page.getByRole("textbox", { name: "Explanation", exact: true })).toHaveValue("Borrador sin guardar");
+  await expect(page.getByRole("radio", { name: "A. Uno" })).toBeChecked();
+  expect((await readState(page)).edits).toEqual({});
+  await page.evaluate(() => { window.failWrites = true; });
+  await page.getByRole("combobox", { name: "Language", exact: true }).selectOption("es");
+  await expect(page.getByRole("alert")).toContainText("Could not save.");
+  await expect(page.getByRole("combobox", { name: "Language", exact: true })).toHaveValue("en");
+  await expect(page.getByRole("textbox", { name: "Explanation", exact: true })).toHaveValue("Borrador sin guardar");
+  await page.evaluate(() => { window.failWrites = false; });
+  await page.getByRole("button", { name: "Save changes" }).click();
+  await expect(page.getByText("Edit saved in this browser.")).toBeVisible();
+});
+
+test("legacy saved rounds without a language remain usable after migration", async ({ page }) => {
+  await page.goto("./");
+  await start(page);
+  await page.getByRole("radio", { name: "B. Dos" }).check();
+  await persisted(page, s => s?.round?.selections[0]?.[0] === 1);
+  const original = await readState(page);
+  await page.evaluate(() => new Promise(resolve => {
+    const request = indexedDB.open(`pmle-study:${new URL(".", document.baseURI).pathname}`, 1);
+    request.onsuccess = () => {
+      const db = request.result, tx = db.transaction("state", "readwrite"), store = tx.objectStore("state");
+      const current = store.get("current");
+      current.onsuccess = () => {
+        const state = current.result;
+        delete state.language;
+        store.put(state, "current");
+      };
+      tx.oncomplete = () => { db.close(); resolve(); };
+    };
+  }));
+  await page.reload();
+  await expect(page.getByRole("combobox", { name: "Idioma", exact: true })).toHaveValue("es");
+  await expect(page.getByRole("radio", { name: "B. Dos" })).toBeChecked();
+  await page.getByRole("combobox", { name: "Idioma", exact: true }).selectOption("en");
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  const migrated = await readState(page);
+  expect(migrated.round).toEqual(original.round);
+  expect(migrated.progress).toEqual(original.progress);
+  expect(migrated.language).toBe("en");
+  await page.getByRole("button", { name: "Check answer" }).click();
+  await expect(page.getByText("Correct answer.", { exact: true })).toBeVisible();
+});
