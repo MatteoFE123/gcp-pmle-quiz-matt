@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Plan PMLE · Examen 28 de octubre de 2026</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #111210;
+      --surface: #1a1c19;
+      --surface-2: #222520;
+      --text: #f1f0e8;
+      --muted: #aaada3;
+      --line: #363a33;
+      --accent: #d7ff68;
+      --blue: #8cc8ff;
+      --orange: #ffbd7a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 16px/1.6 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    main { width: min(1080px, calc(100% - 32px)); margin: 0 auto; padding: 72px 0 96px; }
+    h1, h2, h3 { line-height: 1.08; letter-spacing: -0.025em; }
+    h1 { max-width: 850px; margin: 10px 0 22px; font-size: clamp(2.5rem, 7vw, 5.6rem); }
+    h2 { margin: 72px 0 20px; font-size: clamp(1.8rem, 4vw, 3rem); }
+    h3 { margin: 8px 0 12px; font-size: 1.35rem; }
+    p { max-width: 760px; color: var(--muted); }
+    strong { color: var(--text); }
+    .eyebrow { margin: 0; color: var(--accent); font-size: .78rem; font-weight: 750; letter-spacing: .12em; }
+    .lead { font-size: 1.15rem; }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      margin-top: 42px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--line);
+    }
+    .metric { padding: 24px; background: var(--surface); }
+    .metric b { display: block; color: var(--text); font-size: 2rem; }
+    .metric span { color: var(--muted); }
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .card { padding: 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
+    .card p:last-child { margin-bottom: 0; }
+    .method {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin: 20px 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: steps;
+    }
+    .method li { padding: 22px; border-top: 2px solid var(--accent); background: var(--surface); }
+    .method li::before { counter-increment: steps; content: "0" counter(steps); display: block; color: var(--accent); font-weight: 750; }
+    table { width: 100%; border-collapse: collapse; overflow: hidden; border: 1px solid var(--line); background: var(--surface); }
+    th, td { padding: 13px 15px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { color: var(--muted); background: var(--surface-2); font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; }
+    td:nth-child(3) { width: 90px; }
+    summary { cursor: pointer; color: var(--accent); font-weight: 700; }
+    .ids { max-width: 620px; margin: 8px 0 0; color: var(--text); font: .9rem/1.7 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .block { display: inline-block; padding: 2px 9px; border-radius: 999px; color: #111; font-size: .78rem; font-weight: 750; }
+    .block-1 { background: var(--accent); }
+    .block-2 { background: var(--blue); }
+    .block-3 { background: var(--orange); }
+    .review { padding: 24px; border-left: 3px solid var(--accent); background: var(--surface); }
+    .review li { margin: 10px 0; }
+    .note { padding: 18px 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); }
+    a { color: var(--accent); }
+    @media (max-width: 760px) {
+      main { padding-top: 42px; }
+      .summary, .cards, .method { grid-template-columns: 1fr; }
+      th:nth-child(2), td:nth-child(2) { display: none; }
+      th, td { padding: 11px 10px; }
+    }
+    @media print {
+      :root { color-scheme: light; --bg: #fff; --surface: #fff; --surface-2: #f5f5f1; --text: #111; --muted: #444; --line: #bbb; --accent: #446000; }
+      main { width: 100%; padding: 0; }
+      details { open: true; }
+      .card, tr { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">PLAN PERSONAL · GOOGLE CLOUD PMLE</p>
+  <h1>841 preguntas.<br>21 días para dominarlas.</h1>
+  <p class="lead">Primera vuelta completa del <strong>4 al 24 de octubre de 2026</strong>. Los días 25, 26 y 27 se usan para corregir fallos y practicar. El examen es el <strong>28 de octubre</strong>.</p>
+
+  <section class="summary" aria-label="Resumen">
+    <div class="metric"><b>841</b><span>preguntas asignadas</span></div>
+    <div class="metric"><b>40</b><span>preguntas por día, salvo una sesión de 41</span></div>
+    <div class="metric"><b>3</b><span>días finales de repaso</span></div>
+  </section>
+
+  <h2>Hoy, 3 de octubre</h2>
+  <p class="note"><strong>Prepara el sistema en 30 minutos.</strong> Abre la aplicación, guarda una copia de tu progreso y crea una hoja con cuatro columnas: ID, resultado, duda y tema a revisar. No intentes avanzar preguntas hoy; deja preparado el seguimiento para empezar mañana.</p>
+
+  <h2>Los tres bloques</h2>
+  <div class="cards">
+    
+            <article class="card">
+              <p class="eyebrow">BLOQUE 1 · 280 PREGUNTAS · 4–10 OCT</p>
+              <h3>Datos, diseño y fundamentos de ML</h3>
+              <p>Entender el problema, preparar los datos y elegir cómo construir y medir el modelo.</p>
+            </article>
+            <article class="card">
+              <p class="eyebrow">BLOQUE 2 · 280 PREGUNTAS · 11–17 OCT</p>
+              <h3>Entrenamiento, escalado y optimización</h3>
+              <p>Dominar el entrenamiento, los hiperparámetros, el hardware y la mejora del rendimiento.</p>
+            </article>
+            <article class="card">
+              <p class="eyebrow">BLOQUE 3 · 281 PREGUNTAS · 18–24 OCT</p>
+              <h3>Producción, MLOps y monitorización</h3>
+              <p>Llevar modelos a producción, automatizar el ciclo de vida y detectar degradación.</p>
+            </article>
+  </div>
+
+  <h2>Rutina diaria</h2>
+  <ol class="method">
+    <li><strong>Ronda 1</strong><br>20 preguntas sin mirar apuntes. Marca las dudosas.</li>
+    <li><strong>Corrección</strong><br>Lee cada explicación. Anota por qué fallaste, no solo la respuesta.</li>
+    <li><strong>Ronda 2</strong><br>20 preguntas y 15 minutos de repaso de los fallos del día anterior.</li>
+  </ol>
+  <p class="note"><strong>Regla útil:</strong> una pregunta solo cuenta como estudiada si puedes explicar por qué la opción correcta es mejor y por qué las demás no lo son. Tiempo orientativo: 2½–3½ horas al día.</p>
+
+  <h2>Calendario de la primera vuelta</h2>
+  <table>
+    <thead><tr><th>Fecha</th><th>Bloque</th><th>Cantidad</th><th>Preguntas</th></tr></thead>
+    <tbody>
+      
+            <tr>
+              <td><strong>domingo 4</strong></td>
+              <td><span class="block block-1">Bloque 1</span></td>
+              <td>40</td>
+              <td><details><summary>Ver IDs</summary><p class="ids">911, 359, 882, 297, 469, 480, 561, 614, 733, 515, 559, 761, 286, 340, 409, 748, 827, 122, 145, 154, 206, 209, 342, 364, 366, 488, 574, 619, 629, 631, 688, 791, 490, 881, 915, 156, 375, 420, 533, 647</p></details></td>
+            </tr>
+
+            <tr>
+              <td><strong>lunes 5</strong></td>
+              <td><span class="block block-1">Bloque 1</span></td>
+              <td>40</td>
+              <td><details><summary>Ver IDs</summary><p class="ids">648, 747, 759, 817, 880, 885, 939, 281, 325, 395, 502, 555, 608, 632, 783, 876, 924, 928, 936, 165, 197, 217, 257, 260, 262, 369, 378, 413, 437, 439, 459, 468, 573, 579, 742, 846, 858, 861, 159, 187</p></details></td>
+            </tr>
+
+            <tr>
+              <td><strong>martes 6</strong></td>
+              <td><span class="block block-1">Bloque 1</span></td>
+              <td>40</td>
+              <td><details><summary>Ver IDs</summary><p class="ids">234, 241, 245, 316, 345, 347, 388, 398, 429, 450, 471, 492, 497, 514, 518, 554, 606, 694, 737, 784, 788, 810, 844, 893, 110, 119, 124, 172, 224, 242, 356, 382, 386, 524, 527, 535, 552, 583, 620, 645</p></details></td>
+            </tr>
+
+            <tr>
+              <td><strong>miércoles 7</strong></td>
+              <td><span class="block block-1">Bloque 1</span></td>
+              <td>40</td>
+              <td><details><summary>Ver IDs</summary><p class="ids">660, 665, 669, 774, 775, 801, 852, 904, 937, 104, 133, 162, 181, 228, 296, 337, 343, 355, 397, 406, 434, 472, 493, 496, 536, 562, 569, 575, 594, 623, 698, 701, 702, 705, 717, 730, 780, 795, 803, 821</p></details></td>
+            </tr>
+
+            <tr>
+              <td><strong>jueves 8</strong></td>
+              <td><span class="block block-1">Bloque 1</span></td>
+              <td>40</td>
+              <td><details><summary>Ver IDs</summary><p class="ids">823, 825, 838, 903, 906, 931, 935, 109, 130, 147, 188, 203, 229, 243, 309, 313, 323, 339, 361, 419, 458, 477, 510, 512, 566, 666, 709, 755, 767, 777, 808, 815, 837, 843, 871, 875, 916, 940, 274, 317</p></details></td>
+            </tr>
+
+            <tr>
+              <td><strong>viernes 9</strong></td>
+              <td><span class="block block-1">Bloque 1</span></td>
+              <td>40</td>
+              <td><details><summary>Ver IDs</summary><p class="ids">341, 390, 401, 427, 475, 484, 504, 517, 530, 568, 587, 630, 661, 681, 685, 687, 704, 762, 764, 766, 836, 850, 859, 909, 918, 921, 943, 945, 108, 134, 136, 142, 163, 169, 173, 198, 200, 223, 250, 291</p></details></td>
+            </tr>
+
+            <tr>
+              <td><strong>sábado 10</strong></td>
+              <td><span class="block block-1">Bloque 1</span></td>
+              <td>40</td>
+              <td><details><summary>Ver IDs</summary><p class="ids">404, 435, 451, 537, 542, 567, 590, 628, 724, 735, 798, 851, 877, 919, 152, 222, 239, 263, 279, 320, 383, 399, 403, 424, 425, 443, 445, 503, 520, 540, 576, 589, 599, 663, 731, 740, 781, 864, 866, 879</p></details></td>
+            </tr>
+
+            <tr>
+              <td><strong>domingo 11</strong></td>
+              <td><span class="block block-2">Bloque 2</span></td>
+              <td>40</td>
+              <td><details><summary>Ver IDs</summary><p class="ids">901, 391, 167, 207, 380, 912, 719, 741, 538, 618, 888, 111, 157, 812, 923, 125, 178, 371, 487, 548, 736, 797, 860, 107, 261, 265, 721, 760, 833, 353, 412, 577, 582, 601, 744, 295, 570, 650, 707, 768</p></details></td>
+            </tr>
+
+            <tr>
+              <td><strong>lunes 12</strong></td>
+              <td><span class="block block-2">Bloque 2</span></td>
+              <td>40</td>
+              <td><details><summary>Ver IDs</summary><p class="ids">886, 183, 193, 204, 210, 289, 430, 447, 460, 476, 547, 671, 826, 160, 171, 225, 277, 327, 372, 438, 483, 485, 498, 534, 578, 641, 884, 226, 270, 365, 509, 668, 756, 849, 869, 892, 105, 115, 192, 269</p></details></td>
+            </tr>
+
+            <tr>
+              <td><strong>martes 13</strong></td>
+              <td><span class="block block-2">Bloque 2</span></td>
+              <td>40</td>
+              <td><details><summary>Ver IDs</summary><p class="ids">322, 408, 455, 627, 690, 732, 786, 834, 897, 934, 118, 132, 146, 164, 175, 180, 199, 292, 545, 602, 636, 655, 691, 693, 900, 948, 113, 141, 150, 182, 253, 280, 282, 294, 307, 452, 474, 546, 603, 633</p></details></td>
+            </tr>
+
+            <tr>
+              <td><strong>miércoles 14</strong></td>
+              <td><span class="block block-2">Bloque 2</span></td>
+              <td>40</td>
+              <td><details><summary>Ver IDs</summary><p class="ids">637, 672, 697, 776, 779, 802, 809, 898, 946, 950, 211, 314, 418, 426, 457, 541, 580, 657, 664, 673, 713, 752, 782, 804, 855, 857, 883, 106, 184, 255, 258, 319, 348, 394, 448, 465, 525, 596, 626, 715</p></details></td>
+            </tr>
+
+            <tr>
+              <td><strong>jueves 15</strong></td>
+              <td><span class="block block-2">Bloque 2</span></td>
+              <td>40</td>
+              <td><details><summary>Ver IDs</summary><p class="ids">729, 874, 878, 889, 944, 951, 300, 312, 328, 334, 376, 431, 432, 563, 595, 678, 680, 714, 726, 830, 853, 872, 333, 344, 346, 423, 467, 500, 543, 588, 667, 749, 757, 799, 917, 922, 191, 276, 284, 400</p></details></td>
+            </tr>
+
+            <tr>
+              <td><strong>viernes 16</strong></td>
+              <td><span class="block block-2">Bloque 2</span></td>
+              <td>40</td>
+              <td><details><summary>Ver IDs</summary><p class="ids">462, 553, 613, 646, 658, 117, 137, 170, 374, 422, 436, 499, 539, 743, 792, 927, 932, 189, 389, 396, 532, 644, 710, 870, 121, 128, 148, 153, 166, 185, 194, 205, 216, 218, 219, 230, 233, 259, 264, 268</p></details></td>
+            </tr>
+
+            <tr>
+              <td><strong>sábado 17</strong></td>
+              <td><span class="block block-2">Bloque 2</span></td>
+              <td>40</td>
+              <td><details><summary>Ver IDs</summary><p class="ids">293, 299, 324, 332, 338, 358, 360, 363, 385, 410, 440, 456, 473, 481, 505, 513, 556, 572, 584, 600, 611, 640, 642, 649, 652, 653, 656, 679, 699, 708, 727, 738, 770, 778, 800, 805, 819, 847, 894, 895</p></details></td>
+            </tr>
+
+            <tr>
+              <td><strong>domingo 18</strong></td>
+              <td><span class="block block-3">Bloque 3</span></td>
+              <td>41</td>
+              <td><details><summary>Ver IDs</summary><p class="ids">700, 271, 818, 252, 103, 367, 495, 712, 841, 902, 929, 195, 370, 416, 523, 703, 120, 212, 267, 769, 131, 373, 377, 466, 544, 607, 610, 616, 617, 751, 765, 208, 266, 407, 489, 638, 689, 754, 789, 811, 926</p></details></td>
+            </tr>
+
+            <tr>
+              <td><strong>lunes 19</strong></td>
+              <td><span class="block block-3">Bloque 3</span></td>
+              <td>40</td>
+              <td><details><summary>Ver IDs</summary><p class="ids">235, 315, 335, 414, 421, 529, 564, 720, 723, 144, 151, 161, 168, 352, 354, 449, 549, 593, 634, 706, 734, 785, 796, 814, 839, 873, 140, 201, 220, 227, 290, 321, 349, 362, 392, 411, 446, 571, 586, 597</p></details></td>
+            </tr>
+
+            <tr>
+              <td><strong>martes 20</strong></td>
+              <td><span class="block block-3">Bloque 3</span></td>
+              <td>40</td>
+              <td><details><summary>Ver IDs</summary><p class="ids">639, 856, 896, 910, 925, 933, 190, 196, 213, 221, 231, 236, 417, 428, 478, 557, 605, 625, 651, 675, 682, 824, 868, 887, 942, 123, 129, 149, 247, 249, 283, 329, 368, 491, 528, 692, 716, 718, 840, 842</p></details></td>
+            </tr>
+
+            <tr>
+              <td><strong>miércoles 21</strong></td>
+              <td><span class="block block-3">Bloque 3</span></td>
+              <td>40</td>
+              <td><details><summary>Ver IDs</summary><p class="ids">865, 941, 127, 176, 179, 240, 248, 298, 304, 308, 331, 336, 351, 442, 444, 461, 486, 506, 521, 526, 604, 662, 677, 683, 820, 822, 831, 832, 908, 930, 138, 143, 155, 232, 246, 273, 287, 288, 330, 381</p></details></td>
+            </tr>
+
+            <tr>
+              <td><strong>jueves 22</strong></td>
+              <td><span class="block block-3">Bloque 3</span></td>
+              <td>40</td>
+              <td><details><summary>Ver IDs</summary><p class="ids">387, 393, 405, 415, 551, 558, 670, 676, 695, 725, 773, 794, 907, 114, 126, 177, 244, 256, 302, 384, 433, 479, 516, 612, 615, 684, 728, 771, 772, 806, 828, 938, 215, 237, 238, 251, 254, 278, 357, 464</p></details></td>
+            </tr>
+
+            <tr>
+              <td><strong>viernes 23</strong></td>
+              <td><span class="block block-3">Bloque 3</span></td>
+              <td>40</td>
+              <td><details><summary>Ver IDs</summary><p class="ids">470, 519, 560, 565, 592, 624, 635, 674, 696, 722, 746, 763, 793, 816, 845, 848, 920, 116, 139, 275, 303, 402, 441, 522, 581, 598, 739, 750, 790, 835, 854, 863, 913, 174, 272, 301, 306, 318, 494, 511</p></details></td>
+            </tr>
+
+            <tr>
+              <td><strong>sábado 24</strong></td>
+              <td><span class="block block-3">Bloque 3</span></td>
+              <td>40</td>
+              <td><details><summary>Ver IDs</summary><p class="ids">531, 643, 654, 686, 745, 890, 891, 949, 112, 158, 186, 202, 285, 305, 310, 311, 326, 350, 379, 454, 463, 482, 501, 507, 585, 591, 609, 621, 622, 659, 753, 758, 787, 807, 813, 829, 862, 867, 905, 914</p></details></td>
+            </tr>
+    </tbody>
+  </table>
+
+  <h2>Repaso final</h2>
+  <div class="review">
+    <ol>
+      <li><strong>25 de octubre — reparar puntos débiles.</strong> Repite todas las preguntas falladas y dudosas. Agrupa los errores por tema y crea una nota corta por tema.</li>
+      <li><strong>26 de octubre — simulacro.</strong> Haz dos rondas mixtas de 50 preguntas, sin apuntes y con límite de tiempo. Corrige todo al terminar.</li>
+      <li><strong>27 de octubre — consolidar y descansar.</strong> Repite solo los fallos del simulacro, revisa servicios parecidos y termina pronto. No abras temas nuevos.</li>
+      <li><strong>28 de octubre — examen.</strong> Repaso ligero de 20–30 minutos como máximo. Lee bien palabras como <em>first</em>, <em>best</em>, <em>minimum effort</em> y <em>cost-effective</em>.</li>
+    </ol>
+  </div>
+
+  <h2>Cómo medir si vas bien</h2>
+  <p>Al final de cada bloque, busca al menos <strong>80 % de aciertos</strong> al repetir los fallos. Si quedas por debajo, no añadas más teoría: revisa primero las explicaciones y compara los productos que confundiste.</p>
+  <p>El archivo <a href="../data/study-plan-2026-10.csv">study-plan-2026-10.csv</a> contiene las 841 filas, con fecha, ID, temas, productos y enunciado. Sirve para filtrar o marcar el avance en Excel o Google Sheets.</p>
+  <p class="note">Este banco es material de práctica y no garantiza el resultado del examen. Las preguntas se agruparon usando sus etiquetas actuales; algunas cubren más de un bloque.</p>
+</main>
+</body>
+</html>

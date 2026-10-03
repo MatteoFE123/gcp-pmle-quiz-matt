@@ -6,6 +6,8 @@ Aplicación para preparar Google Cloud Professional Machine Learning Engineer, e
 
 GitHub Pages sirve HTML, CSS, JavaScript y el banco de preguntas. No necesita Python, cuentas ni un servidor de Streamlit. La versión local de Streamlit se conserva como alternativa y usa sus propios archivos de datos.
 
+**Plan de estudio para el examen del 28 de octubre de 2026:** abre [`_docs/study-plan-2026-10.html`](_docs/study-plan-2026-10.html). Distribuye las 841 preguntas en tres bloques y 21 sesiones, con tres días finales de repaso.
+
 ## Qué puedes hacer
 
 - **Inicio:** continuar una ronda, preparar una práctica y ver un resumen del progreso.
